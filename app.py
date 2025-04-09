@@ -3,12 +3,14 @@ from routers.characters import characters_bp
 
 
 def create_app():
+    """Creates the app, registers all blueprints, return the app"""
     app = Flask(__name__)
     app.register_blueprint(characters_bp, url_prefix='/characters')
     return app
 
 
 def main():
+    """Main function that starts the app"""
     app = create_app()
     app.run(debug=True)
 
