@@ -69,7 +69,10 @@ class JSONDataManager(DataManager):
         """Deletes a character with id=character_id
         from the instance storage
         """
-        return super().remove_character(character_id)
+        remove_character = self.read_character(character_id)
+        if remove_character:
+            self.storage.remove(remove_character)
+        return remove_character
 
     def update_character(self, character_id, character):
         """Updates character info for the character with id=character_id"""

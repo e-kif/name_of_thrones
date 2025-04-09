@@ -62,3 +62,25 @@ def test_json_create_operation():
         db.add_character({'id': 55, 'name': 'Mock', 'role': 'Mocker', 'strength': 'Mocking'})
     with pytest.raises(ValueError):
         db.add_character({'role': 'Nameless person', 'strength': 'Stealth'})
+
+def test_json_delete_operation():
+    db = json_db()
+    assert isinstance(db.remove_character(2), dict), 'Remove method returns wrong data type'
+    assert len(db) == 49, 'Remove method did not reduce amount of characters'
+    assert db.remove_character(1) == {
+                                        "id": 1,
+                                        "name": "Jon Snow",
+                                        "house": "Stark",
+                                        "animal": "Direwolf",
+                                        "symbol": "Wolf",
+                                        "nickname": "King in the North",
+                                        "role": "King",
+                                        "age": 25,
+                                        "death": None,
+                                        "strength": "Physically strong"
+                                        }, 'Remove method returned wrong data'
+    with pytest.raises(KeyError):
+        db.remove_character(58)
+        db.remove_character(1)
+    with pytest.raises(TypeError):
+        db.remove_character('1')
