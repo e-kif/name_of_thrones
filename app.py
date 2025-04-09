@@ -1,5 +1,5 @@
 if __name__ == '__main__':
-
+    pass
     # todo flask routers with blueprints
     # todo swagger docs
     # todo crud operations
@@ -12,6 +12,7 @@ if __name__ == '__main__':
     # todo user list + database counterpart
     # todo jwt auth
     # todo test coverage
+    # todo update requirements
     # todo update readme
     # todo deploy
     # todo ci/cd workflow
