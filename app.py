@@ -1,5 +1,21 @@
+from flask import Flask
+from routers.characters import characters_bp
+
+
+def create_app():
+    app = Flask(__name__)
+    app.register_blueprint(characters_bp, url_prefix='/characters')
+    return app
+
+
+def main():
+    app = create_app()
+    app.run(debug=True)
+
+
 if __name__ == '__main__':
-    pass
+    main()
+    
     # todo flask routers with blueprints
     # todo swagger docs
     # todo crud operations
