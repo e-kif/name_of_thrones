@@ -29,8 +29,21 @@ class JSONDataManager(DataManager):
         return super().add_character(character)
 
     def read_character(self, character_id):
-        """Reads a character with id=character_id from the instance storage"""
-        return super().read_character(character_id)
+        """Retrieves a character with id=character_id from the instance storage using binary search algorithm"""
+        
+        left, right = 0, len(self.storage)
+        while left <= right:
+            mid = (left + right) // 2
+            if mid >= len(self.storage):
+                break
+            if self.storage[mid]['id'] == character_id:
+                return self.storage[mid]
+            elif self.storage[mid]['id'] < character_id:
+                left = mid + 1
+            else:
+                right = mid - 1
+        
+        raise KeyError(f'There is no character with id={character_id} in database.')
 
     def remove_character(self, character_id):
         """Deletes a character with id=character_id
