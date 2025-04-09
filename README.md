@@ -55,3 +55,7 @@ Stay ahead of the chaos. With Name of Thrones, you’ll never lose track of who�
 - *Character Attributes:* Track names, houses, animals, symbols, nicknames, roles, ages, deaths, and even their strength—because every detail matters in the game of thrones!
 
 
+## Whispers in the Wind
+
+### Assumptions:
+1. Character list is ordered by character id (for binary search with JSON-type data).
