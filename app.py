@@ -17,7 +17,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+
     # todo flask routers with blueprints
     # todo swagger docs
     # todo crud operations

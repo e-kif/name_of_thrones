@@ -56,7 +56,9 @@ def test_json_create_operation():
     assert len(db) == 51, 'Character was not added'
     assert robert_db.get('id'), 'New character does not have "id" key'
     assert robert_db['id'] == 51, 'New character id is wrong'
-    assert robert_db.get('nickname'), 'Omitted optional field was not created'
+    assert robert_db.get('nickname') is None, 'Omitted optional field was not created'
     assert robert_db['nickname'] is None, 'Omitted optional field has wrong value'
     with pytest.raises(ValueError):
-        assert db.add_character({'id': 55, 'name': 'Mock', 'role': 'Mocker', 'strength': 'Mocking'})
+        db.add_character({'id': 55, 'name': 'Mock', 'role': 'Mocker', 'strength': 'Mocking'})
+    with pytest.raises(ValueError):
+        db.add_character({'role': 'Nameless person', 'strength': 'Stealth'})

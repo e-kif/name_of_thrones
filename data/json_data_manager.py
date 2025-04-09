@@ -5,6 +5,8 @@ from data.data_manager import DataManager
 
 class JSONDataManager(DataManager):
     """Data manager for interacting with JSON type storage"""
+    optional_fields = {'nickname', 'death', 'symbol', 'house', 'animal', 'age'}
+    required_fields = {'name', 'strength', 'role'}
 
     def __init__(
             self,
@@ -16,6 +18,7 @@ class JSONDataManager(DataManager):
         into self.storage instance variable
         """
         self.storage = self.load_json_file(storage_file)
+        self.next_character_index = len(self) + 1
 
     def load_json_file(self, filename: str) -> list | dict:
         """Loads info from JSON file as a Python object (list or dictionary)"""
@@ -28,7 +31,20 @@ class JSONDataManager(DataManager):
 
     def add_character(self, character) -> dict:
         """Adds new character to the instance storage"""
-        return super().add_character(character)
+        if character.get('id'):
+            raise ValueError('Character id should not be provided.')
+        missing_required_fields = self.required_fields\
+            .difference(set(character.keys()))
+        if missing_required_fields:
+            raise ValueError('Missing required field(s): '
+                             f'{", ".join(missing_required_fields)}')
+        character.update({'id': self.next_character_index})
+        [character.update({key: None}) for key in self.optional_fields
+         if key not in character.keys()]
+        print(f'{character=}')
+        self.storage.append(character)
+        self.next_character_index += 1
+        return character
 
     def read_character(self, character_id) -> dict:
         """Retrieves a character with id=character_id
