@@ -9,29 +9,47 @@ db = json_db()
 
 @characters_bp.route('/', methods=['GET'])
 def get_characters():
-    return db.characters, 200
+    characters = db.characters
+    if characters:
+        return jsonify(characters), 200
+    else:
+        return jsonify({'error': 'No characters were found'}), 404
 
 
 @characters_bp.route('/<int:character_id>', methods=['GET'])
 def get_character(character_id: int) -> CharacterOut:
-    return db.read_character(character_id), 200
+    try:
+        character = db.read_character(character_id)
+        return jsonify(character), 200
+    except KeyError as error:
+        return jsonify({'error': error.args[0]}), 404
 
 
 @characters_bp.route('/', methods=['POST'])
 def add_character() -> CharacterOut:
     new_character = request.get_json()
-    return db.add_character(new_character), 201
+    try:
+        return db.add_character(new_character), 201
+    except ValueError as error:
+        return jsonify({'error': error.args[0]}), 400
 
 
 @characters_bp.route('/<int:charter_id>', methods=['DELETE'])
 def remove_character(character_id: int) -> CharacterOut:
-    removed_character = db.remove_character(character_id)
-    return removed_character
+    try:
+        removed_character = db.remove_character(character_id)
+        return jsonify({'removed character': removed_character}), 200
+    except KeyError as error:
+        return jsonify({'error': error.args[0]}), 404
 
 
 @characters_bp.route('/<int:character_id>', methods=['PUT'])
 def update_character(character_id: int) -> CharacterOut:
     updated_character = request.get_json()
-    db_character = db.update_character(updated_character)
-    return db_character
-    
+    try:
+        db_character = db.update_character(updated_character)
+        return db_character
+    except ValueError as error:
+        return jsonify({'error': error.args[0]}), 404
+    except AttributeError as error:
+        return jsonify({'error': error.args[0]}), 400

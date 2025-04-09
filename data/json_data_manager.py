@@ -36,8 +36,8 @@ class JSONDataManager(DataManager):
         missing_required_fields = self.required_fields\
             .difference(set(character.keys()))
         if missing_required_fields:
-            raise ValueError('Missing required field(s): '
-                             f'{", ".join(missing_required_fields)}')
+            raise ValueError('Missing required field(s): '\
+                             f'{", ".join(missing_required_fields)}.')
         character.update({'id': self.next_character_index})
         [character.update({key: None}) for key in self.optional_fields
          if key not in character.keys()]
@@ -49,7 +49,6 @@ class JSONDataManager(DataManager):
     def read_character(self, character_id) -> dict:
         """Retrieves a character with id=character_id
         from the instance storage using binary search algorithm"""
-
         left, right = 0, len(self.storage)
         while left <= right:
             mid = (left + right) // 2
@@ -61,9 +60,8 @@ class JSONDataManager(DataManager):
                 left = mid + 1
             else:
                 right = mid - 1
-
         raise KeyError(
-            f'There is no character with id={character_id} in database.')
+            f'Character with id={character_id} was not found.')
 
     def remove_character(self, character_id):
         """Deletes a character with id=character_id
@@ -76,7 +74,17 @@ class JSONDataManager(DataManager):
 
     def update_character(self, character_id, character):
         """Updates character info for the character with id=character_id"""
-        return super().update_character(character_id, character)
+        if character.get('id'):
+            raise AttributeError('Character id is not allowed to be changed')
+        not_allowed_keys = set(character.keys())\
+            .difference(self.optional_fields)\
+            .difference(self.required_fields)
+        if not_allowed_keys:
+            raise AttributeError('Not allowed key(s): '
+                                 f'{", ".join(not_allowed_keys)}.')
+        db_character = self.read_character(character)
+        db_character.update(character)
+        return db_character
 
     @property
     def characters(self) -> list:
