@@ -38,3 +38,25 @@ def test_json_read_operations():
     with pytest.raises(KeyError):
         assert json_db().read_character(101), 'Key error was not raised for character_id > len(characters)'
     assert set(json_db().read_character(1).keys()) == {'id', 'name', 'house', 'animal', 'symbol', 'nickname', 'role', 'age', 'death', 'strength'}, 'Not all character keys were retrieved'
+
+
+def test_json_create_operation():
+    robert_dict = {
+        'name': 'Robert Baratheon',
+        'house': 'Baratheon',
+        'animal': 'Stag',
+        'symbol': 'Crowned Stag',
+        'role': 'Lord of the Seven Kingdoms',
+        'age': 36,
+        'death': 1,
+        'strength': 'Immense physical strength'
+    }
+    db = json_db()
+    robert_db = db.add_character(robert_dict)
+    assert len(db) == 51, 'Character was not added'
+    assert robert_db.get('id'), 'New character does not have "id" key'
+    assert robert_db['id'] == 51, 'New character id is wrong'
+    assert robert_db.get('nickname'), 'Omitted optional field was not created'
+    assert robert_db['nickname'] is None, 'Omitted optional field has wrong value'
+    with pytest.raises(ValueError):
+        assert db.add_character({'id': 55, 'name': 'Mock', 'role': 'Mocker', 'strength': 'Mocking'})
