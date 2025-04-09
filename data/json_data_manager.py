@@ -45,4 +45,4 @@ class JSONDataManager(DataManager):
     @property
     def characters(self):
         """Getter method for returning current instance storage"""
-        return self.read_characters
+        return self.read_characters()
