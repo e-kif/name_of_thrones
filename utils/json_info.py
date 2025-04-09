@@ -59,3 +59,4 @@ if __name__ == '__main__':
           get_characters_values('name', filter_characters('HOUSE', None)))
     print('names of characters of House Stark:',
           get_characters_values('name', filter_characters('HOuSE', 'stARk')))
+    print('all houses:', set(get_characters_values('HOUSE')).difference({None}))
