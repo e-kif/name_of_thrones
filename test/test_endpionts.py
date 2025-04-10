@@ -28,7 +28,13 @@ def test_create_character(client, jon_snow, daenerys, olenna_tyrell):
 
 
 def test_delete_character(client, jon_snow, daenerys, olenna_tyrell):
-    pass
+    response = client.get('/characters/1')
+    assert response.status_code == 200
+    assert response.json == jon_snow
+    first_character = client.get('characters/1')
+    assert first_character.status_code != 200, 'Character was not deleted'
+    assert first_character.status_code == 404
+    assert first_character.json == {"error": "Character with id=1 was not found."}
 
 
 def test_update_character(client, jon_snow, daenerys, olenna_tyrell):

@@ -36,7 +36,7 @@ class JSONDataManager(DataManager):
         missing_required_fields = self.required_fields\
             .difference(set(character.keys()))
         if missing_required_fields:
-            raise ValueError('Missing required field(s): '\
+            raise ValueError('Missing required field(s): '
                              f'{", ".join(missing_required_fields)}.')
         character.update({'id': self.next_character_index})
         [character.update({key: None}) for key in self.optional_fields

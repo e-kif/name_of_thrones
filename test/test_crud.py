@@ -16,6 +16,8 @@ def test_json_read_operations(jon_snow, daenerys):
     with pytest.raises(KeyError):
         assert json_db().read_character(101), 'Key error was not raised for character_id > len(characters)'
     assert set(json_db().read_character(1).keys()) == {'id', 'name', 'house', 'animal', 'symbol', 'nickname', 'role', 'age', 'death', 'strength'}, 'Not all character keys were retrieved'
+    with pytest.raises(FileNotFoundError):
+        json_db('wrong_file.json')
 
 
 def test_json_create_operation(robert_baratheon):
