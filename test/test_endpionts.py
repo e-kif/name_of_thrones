@@ -28,9 +28,9 @@ def test_create_character(client, jon_snow, daenerys, olenna_tyrell):
 
 
 def test_delete_character(client, jon_snow, daenerys, olenna_tyrell):
-    response = client.get('/characters/1')
+    response = client.delete('/characters/1')
     assert response.status_code == 200
-    assert response.json == jon_snow
+    assert response.json == {'removed character': jon_snow}
     first_character = client.get('characters/1')
     assert first_character.status_code != 200, 'Character was not deleted'
     assert first_character.status_code == 404
