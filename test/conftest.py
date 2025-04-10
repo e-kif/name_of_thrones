@@ -20,9 +20,6 @@ def client():
     with app.test_client() as client:
         yield client
 
-    with open(db_path, 'r') as f:
-        print(f.read())
-
     os.close(db_fd)
     os.remove(db_path)
 
