@@ -61,3 +61,15 @@ def olenna_tyrell():
             "role": "Matriarch",
             "strength": "Cunning",
             "symbol": "Rose"}
+
+
+@pytest.fixture()
+def robert_baratheon():
+    return {'name': 'Robert Baratheon',
+            'house': 'Baratheon',
+            'animal': 'Stag',
+            'symbol': 'Crowned Stag',
+            'role': 'Lord of the Seven Kingdoms',
+            'age': 36,
+            'death': 1,
+            'strength': 'Immense physical strength'}
