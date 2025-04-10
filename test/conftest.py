@@ -17,11 +17,6 @@ def client(app):
 
 
 @pytest.fixture()
-def runner(app):
-    return app.test_cli_runner()
-
-
-@pytest.fixture()
 def jon_snow():
     return {"age": 25,
             "animal": "Direwolf",

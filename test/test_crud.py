@@ -31,6 +31,7 @@ def test_json_create_operation(robert_baratheon):
     with pytest.raises(ValueError):
         db.add_character({'role': 'Nameless person', 'strength': 'Stealth'})
 
+
 def test_json_delete_operation(jon_snow):
     db = json_db()
     assert isinstance(db.remove_character(2), dict), 'Remove method returns wrong data type'
@@ -42,3 +43,14 @@ def test_json_delete_operation(jon_snow):
         db.remove_character(1)
     with pytest.raises(TypeError):
         db.remove_character('1')
+
+
+def test_json_update_operation(jon_snow):
+    db = json_db()
+    assert db.update_character(1, {'name': 'Gendalf'})['name'] == 'Gendalf', 'Function returns not updated field'
+    jon_snow.update({'name': 'Gendalf'})
+    assert db.read_character(1) == jon_snow, 'Character was not updated in the database'
+    with pytest.raises(AttributeError):
+        db.update_character(2, {'id': 22}), 'ID update did not raise an error'
+    with pytest.raises(AttributeError):
+        db.update_character(5, {'hair': None}), 'Update with not allowed field'

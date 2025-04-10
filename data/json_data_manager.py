@@ -82,7 +82,7 @@ class JSONDataManager(DataManager):
         if not_allowed_keys:
             raise AttributeError('Not allowed key(s): '
                                  f'{", ".join(not_allowed_keys)}.')
-        db_character = self.read_character(character)
+        db_character = self.read_character(character_id)
         db_character.update(character)
         return db_character
 
