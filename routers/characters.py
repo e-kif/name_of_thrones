@@ -15,7 +15,7 @@ def get_characters():
     if characters:
         return jsonify(characters), 200
     else:
-        return jsonify({'error': 'No characters were found'}), 404
+        return jsonify([]), 404
 
 
 @characters_bp.route('/<int:character_id>', methods=['GET'])
@@ -49,9 +49,9 @@ def remove_character(character_id: int) -> CharacterOut:
 def update_character(character_id: int) -> CharacterOut:
     updated_character = request.get_json()
     try:
-        db_character = db().update_character(updated_character)
+        db_character = db().update_character(character_id, updated_character)
         return db_character
-    except ValueError as error:
+    except KeyError as error:
         return jsonify({'error': error.args[0]}), 404
     except AttributeError as error:
         return jsonify({'error': error.args[0]}), 400
