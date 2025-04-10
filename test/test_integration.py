@@ -1,5 +1,21 @@
 import pytest
 from data.json_data_manager import JSONDataManager as json_db
+from data.data_manager import DataManager
+import abc
+
+
+def test_data_manager_abstract_method():
+    DataManager.__abstractmethods__ = set()
+    assert isinstance(DataManager, abc.ABCMeta)
+
+    class Dummy(DataManager):
+        pass
+
+    assert Dummy().read_characters() is None
+    assert Dummy().read_character(1) is None
+    assert Dummy().remove_character(1) is None
+    assert Dummy().add_character({'name': 'Frodo Beggins'}) is None
+    assert Dummy().update_character(1, {'name': 'Bilbo Beggins'}) is None
 
 
 def test_json_db_integration():
