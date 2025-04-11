@@ -1,9 +1,12 @@
 def test_read_characters(client, jon_snow, daenerys, olenna_tyrell):
-    all_characters = client.get('/characters', follow_redirects=True)
-    assert all_characters.status_code == 200, 'Endpoint returns wrong status code'
-    assert all_characters.json[0] == jon_snow, 'Wrong first character'
-    assert all_characters.json[1] == daenerys, 'Wrong second character'
-    assert all_characters.json[-1] == olenna_tyrell, 'Wrong last character'
+    random20 = client.get('/characters', follow_redirects=True)
+    assert random20.status_code == 200, 'Endpoint returns wrong status code'
+    assert len(random20.json) == 20, 'Wrong character cont for empty limit and skip parameters'
+    first10 = client.get('/characters?limit=10')
+    assert len(first10.json) == 10, 'Wrong character amount for limit=10'
+    assert first10.json[0] == jon_snow, 'wrong first character'
+    assert first10.json[2] == daenerys, 'wrong second character'
+    
 
 
 def test_read_character(client, jon_snow, daenerys, olenna_tyrell):

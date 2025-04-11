@@ -29,8 +29,7 @@ class JSONDataManager(DataManager):
 
     def read_characters(self, limit: int = None, skip: int = None) -> list:
         """Returns current state of the instance storage"""
-        if not any([limit, skip]):
-            print('HERE')
+        if not any([limit, skip]) and len(self) >= 20:
             return sorted(sample(self.storage, 20), key=lambda char: char['id'])
         return self.storage
 

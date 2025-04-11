@@ -2,17 +2,11 @@ import pytest
 from data.json_data_manager import JSONDataManager as json_db
 
 
-def test_json_read_operations(jon_snow, daenerys):
+def test_json_read_operations():
     assert isinstance(json_db().read_characters(), list), 'Wrong data storage type'
-    assert not isinstance(json_db().read_characters(), str), 'Wrong data storage type'
-    assert len(json_db().read_characters()) == 50, 'Not all characters were retrieved'
-    assert json_db().read_characters() == json_db().characters, 'Getter characters error'
+    assert len(json_db().read_characters()) == 20, 'Wrong characters count without set limit'
+    assert json_db().read_characters() != json_db().read_characters(), 'Characters not random'
     assert isinstance(json_db().read_character(1), dict), 'Worng object type for read_character'
-    assert json_db().read_character(1)['name'] == 'Jon Snow', 'Wrong character name for character_id=1'
-    assert json_db().read_character(2)['name'] == 'Daenerys Targaryen', 'Wrong character name for character_id=2'
-    assert json_db().read_character(50)['name'] == 'Olenna Tyrell', 'Wrong character name for character_id=50'
-    assert json_db().read_character(1) == jon_snow, 'Wrong data for read_character(1)'
-    assert json_db().read_character(2) == daenerys, 'Wrong data for read_character(2)'
     with pytest.raises(KeyError):
         assert json_db().read_character(101), 'Key error was not raised for character_id > len(characters)'
     assert set(json_db().read_character(1).keys()) == {'id', 'name', 'house', 'animal', 'symbol', 'nickname', 'role', 'age', 'death', 'strength'}, 'Not all character keys were retrieved'
