@@ -72,6 +72,7 @@ def test_create_character(client, daenerys, robert_baratheon, aemon):
     daenerys.pop('id')
     create_dany = client.post('/characters', json=daenerys, follow_redirects=True)
     assert create_dany.status_code == 400, 'Wrong status code on creating existing character'
+    assert create_dany.json == {'error': f'Character {daenerys['name']} already exists.'}, 'Wrong error message on creating existing character'
 
 
 def test_delete_character(client, jon_snow, daenerys, olenna_tyrell):

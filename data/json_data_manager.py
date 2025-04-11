@@ -45,7 +45,8 @@ class JSONDataManager(DataManager):
         empty_req_fields = [field for field in self.required_fields if character[field] == '']
         if empty_req_fields:
             raise ValueError(f"Character's {', '.join(empty_req_fields)} can not be empty.")
-
+        if self.character_exists(character['name']):
+            raise ValueError(f'Character {character["name"]} already exists.')
         character.update({'id': self.next_character_index})
         [character.update({key: None}) for key in self.optional_fields
          if key not in character.keys()]
@@ -102,3 +103,9 @@ class JSONDataManager(DataManager):
     def __len__(self) -> int:
         """Returns total amount of characters in the instance storage"""
         return len(self.storage)
+
+    def character_exists(self, character_name: str) -> bool:
+        for character in self.characters:
+            if character['name'] == character_name:
+                return True
+        return False
