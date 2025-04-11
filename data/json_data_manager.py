@@ -38,6 +38,13 @@ class JSONDataManager(DataManager):
         if missing_required_fields:
             raise ValueError('Missing required field(s): '
                              f'{", ".join(missing_required_fields)}.')
+        not_defined_req_fields = [field for field in self.required_fields if character[field] is None]
+        if not_defined_req_fields:
+            raise ValueError(f"Character's {', '.join(not_defined_req_fields)} can not be None.")
+        empty_req_fields = [field for field in self.required_fields if character[field] == '']
+        if empty_req_fields:
+            raise ValueError(f"Character's {', '.join(empty_req_fields)} can not be empty.")
+
         character.update({'id': self.next_character_index})
         [character.update({key: None}) for key in self.optional_fields
          if key not in character.keys()]

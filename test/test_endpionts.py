@@ -41,22 +41,22 @@ def test_create_character(client, daenerys, olenna_tyrell, robert_baratheon, aem
     assert create_aemon_id.status_code == 400, 'Creating a character with provided id did not return bad request status code'
     assert create_aemon_id.json == {'error': 'Character id should not be provided.'}, 'Wrong error message on provided character id'
     assert create_aemon_nameless.status_code == 400, 'Character creation with name=None returns wrong status code'
-    assert create_aemon_nameless.json == {'error': 'Character name can not be None.'}, 'Wrong error message on name=None'
+    assert create_aemon_nameless.json == {'error': 'Character\'s name can not be None.'}, 'Wrong error message on name=None'
     assert create_aemon_roleless.status_code == 400, 'Character creation with role=None returns wrong status code'
-    assert create_aemon_roleless.json == {'error': 'Character role can not be None.'}, 'Wrong error message on role=None'
+    assert create_aemon_roleless.json == {'error': 'Character\'s role can not be None.'}, 'Wrong error message on role=None'
     assert create_aemon_strengthless.status_code == 400, 'Character creation with strength=None returns wrong status code'
-    assert create_aemon_strengthless.json == {'error': 'Character strength can not be None.'}, 'Wrong error message on strength=None'
+    assert create_aemon_strengthless.json == {'error': 'Character\'s strength can not be None.'}, 'Wrong error message on strength=None'
 
     aemon_nameless['name'], aemon_roleless['role'], aemon_strengthless['strength'] = '', '', ''
     create_aemon_nameless = client.post('/characters', json=aemon_nameless, follow_redirects=True)
     create_aemon_roleless = client.post('/characters', json=aemon_roleless, follow_redirects=True)
     create_aemon_strengthless = client.post('/characters', json=aemon_strengthless, follow_redirects=True)
     assert create_aemon_nameless.status_code == 400, 'Character creation with empty name field returns wrong status code'
-    assert create_aemon_nameless.json == {'error': 'Character name can not be empty.'}, 'Wrong error message on empty name'
+    assert create_aemon_nameless.json == {'error': 'Character\'s name can not be empty.'}, 'Wrong error message on empty name'
     assert create_aemon_roleless.status_code == 400, 'Character creation with empty role field returns wrong status code'
-    assert create_aemon_roleless.json == {'error': 'Character role can not be empty.'}, 'Wrong error message on empty role'
+    assert create_aemon_roleless.json == {'error': 'Character\'s role can not be empty.'}, 'Wrong error message on empty role'
     assert create_aemon_strengthless.status_code == 400, 'Character creation with empty strength field returns wrong status code'
-    assert create_aemon_strengthless.json == {'error': 'Character strength can not be empty.'}, 'Wrong error message on empty strength'
+    assert create_aemon_strengthless.json == {'error': 'Character\'s strength can not be empty.'}, 'Wrong error message on empty strength'
 
     aemon_nameless.pop('name'); aemon_roleless.pop('role'); aemon_strengthless.pop('strength')
     create_aemon_nameless = client.post('/characters', json=aemon_nameless, follow_redirects=True)
