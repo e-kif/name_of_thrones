@@ -14,10 +14,11 @@ class JSONDataManager(DataManager):
                 os.path.dirname(os.path.abspath(__file__)), '..',
                 'storage', 'characters.json')
             ):
-        """Constructor method loads data from json file
-        into self.storage instance variable
+        """Constructor method loads data from json file, sorts the list by character IDs,
+        assigns sorted character list to self.storage instance variable, creates variable
+        for keeping track of the next character id
         """
-        self.storage = self.load_json_file(storage_file)
+        self.storage = sorted(self.load_json_file(storage_file), key=lambda character: character['id'])
         self.next_character_index = len(self) + 1
 
     def load_json_file(self, filename: str) -> list | dict:

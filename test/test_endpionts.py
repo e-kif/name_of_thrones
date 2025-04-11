@@ -23,7 +23,7 @@ def test_read_character(client, jon_snow, daenerys, olenna_tyrell):
     assert response4.status_code == 404, 'Endpoint returns wrong response code'
 
 
-def test_create_character(client, daenerys, olenna_tyrell, robert_baratheon, aemon):
+def test_create_character(client, daenerys, robert_baratheon, aemon):
     robert = client.post('/characters', json=robert_baratheon, follow_redirects=True)
     assert robert.status_code == 201, 'Wrong status code for character creation'
     assert robert.json.get('id', None), 'ID was not add during character creation'
@@ -68,6 +68,10 @@ def test_create_character(client, daenerys, olenna_tyrell, robert_baratheon, aem
     assert create_aemon_roleless.json == {'error': 'Missing required field(s): role.'}, 'Wrong error message on missing role field'
     assert create_aemon_strengthless.status_code == 400, 'Missing strength filed returns wrong status code'
     assert create_aemon_strengthless.json == {'error': 'Missing required field(s): strength.'}, 'Wrong error message on missing strength field'
+
+    daenerys.pop('id')
+    create_dany = client.post('/characters', json=daenerys, follow_redirects=True)
+    assert create_dany.status_code == 400, 'Wrong status code on creating existing character'
 
 
 def test_delete_character(client, jon_snow, daenerys, olenna_tyrell):
