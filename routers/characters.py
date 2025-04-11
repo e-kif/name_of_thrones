@@ -11,7 +11,8 @@ def db():
 
 @characters_bp.route('/', methods=['GET'])
 def get_characters():
-    characters = db().characters
+    limit, skip = request.args.get('limit'), request.args.get('skip')
+    characters = db().read_characters(limit, skip)
     if characters:
         return jsonify(characters), 200
     else:

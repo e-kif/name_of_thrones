@@ -1,5 +1,6 @@
 import os
 import json
+from random import sample
 from data.data_manager import DataManager
 
 
@@ -26,8 +27,11 @@ class JSONDataManager(DataManager):
         with open(filename, 'r', encoding='utf8') as file_object:
             return json.load(file_object)
 
-    def read_characters(self) -> list:
+    def read_characters(self, limit: int = None, skip: int = None) -> list:
         """Returns current state of the instance storage"""
+        if not any([limit, skip]):
+            print('HERE')
+            return sorted(sample(self.storage, 20), key=lambda char: char['id'])
         return self.storage
 
     def add_character(self, character) -> dict:

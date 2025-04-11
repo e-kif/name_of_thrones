@@ -21,9 +21,8 @@ def main():
 if __name__ == '__main__':
     main()
 
-    # todo flask routers with blueprints
+    # todo convert character list into dict
     # todo swagger docs
-    # todo crud operations
     # todo pagination
     # todo sorting
     # todo filtering
