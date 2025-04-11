@@ -12,7 +12,14 @@ def db():
 @characters_bp.route('/', methods=['GET'])
 def get_characters():
     limit, skip = request.args.get('limit'), request.args.get('skip')
-    characters = db().read_characters(limit, skip)
+    try:
+        limit, skip = int(limit) if limit else None, int(skip) if skip else None
+    except ValueError:
+        return jsonify({'error': 'Limit and skip parameters should be integers.'}), 400
+    try:
+        characters = db().read_characters(limit, skip)
+    except IndexError:
+        return jsonify({'error': 'There are no results for given limit and skip parameters'}), 404
     if characters:
         return jsonify(characters), 200
     else:

@@ -29,9 +29,14 @@ class JSONDataManager(DataManager):
 
     def read_characters(self, limit: int = None, skip: int = None) -> list:
         """Returns current state of the instance storage"""
+        if not self.storage:
+            return []
         if not any([limit, skip]) and len(self) >= 20:
             return sorted(sample(self.storage, 20), key=lambda char: char['id'])
-        return self.storage
+        start, end = limit * skip if skip else 0, limit * (skip + 1) if skip else limit
+        if start >= len(self):
+            raise IndexError
+        return self.storage[start:end]
 
     def add_character(self, character) -> dict:
         """Adds new character to the instance storage"""
@@ -101,7 +106,7 @@ class JSONDataManager(DataManager):
     @property
     def characters(self) -> list:
         """Getter method for returning current instance storage"""
-        return self.read_characters()
+        return self.storage
 
     def __len__(self) -> int:
         """Returns total amount of characters in the instance storage"""
