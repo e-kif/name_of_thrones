@@ -23,7 +23,6 @@ if __name__ == '__main__':
 
     # todo convert character list into dict
     # todo swagger docs
-    # todo pagination
     # todo sorting
     # todo filtering
     # todo database models

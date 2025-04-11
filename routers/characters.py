@@ -19,7 +19,7 @@ def get_characters():
     try:
         characters = db().read_characters(limit, skip)
     except IndexError:
-        return jsonify({'error': 'There are no results for given limit and skip parameters'}), 404
+        return jsonify({'error': 'There are no results for given limit and skip parameters.'}), 404
     if characters:
         return jsonify(characters), 200
     else:

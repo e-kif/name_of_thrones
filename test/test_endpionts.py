@@ -11,6 +11,19 @@ def test_read_characters(client, jon_snow, daenerys, olenna_tyrell):
     wrong_limit = client.get('/characters/?limit=3.4')
     assert wrong_limit.status_code == 400, 'Wrong status code for limit parameter wrong type'
     assert wrong_limit.json == {'error': 'Limit and skip parameters should be integers.'}
+    characters11_20 = client.get('/characters/?limit=10&skip=1')
+    characters31_40 = client.get('/characters/?limit=10&skip=3')
+    assert len(characters11_20.json) == 10, 'Wrong characters amount on page two'
+    for i in range(10):
+        assert characters11_20.json[i]['id'] == i + 11, 'Wrong character id for page 2'
+        assert characters31_40.json[i]['id'] == i + 31, 'Wrong character id for page 4'
+    out_of_range = client.get('/characters/?limit=20&skip=3')
+    assert out_of_range.status_code == 404, 'Wrong status code for out of range limit+skip'
+    assert out_of_range.json == {'error': 'There are no results for given limit and skip parameters.'}, 'Wrong message for out of range error'
+    last10 = client.get('/characters/?limit=20&skip=2')
+    assert last10.status_code == 200
+    assert len(last10.json) == 10, 'Amount of remaining characters is wrong'
+    assert last10.json[-1] == olenna_tyrell, 'Last character is wrong'
 
 
 def test_read_character(client, jon_snow, daenerys, olenna_tyrell):
