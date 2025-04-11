@@ -76,3 +76,10 @@ def robert_baratheon():
             'age': 36,
             'death': 1,
             'strength': 'Immense physical strength'}
+
+@pytest.fixture()
+def aemon():
+    return {'name': 'Aemon Targaryen',
+            'age': 102,
+            'role': 'Maester of the Night\'s Watch',
+            'strength': 'Wisdom and loyalty'}
