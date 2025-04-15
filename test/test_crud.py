@@ -15,8 +15,26 @@ def test_json_read_operations():
 
 
 def test_json_read_characters_filters():
-    assert all([character['house'] == None for character in json_db().read_characters(filter={'house': None})])
-    assert all([character['house'] == 'Stark' for character in json_db().read_characters(filter={'house': 'Tyrell'})])
+    assert all([character['house'] == None for character in json_db().read_characters(filter={'house': None})]), 'Filter by house = None'
+    assert all([character['house'] == 'Stark' for character in json_db().read_characters(filter={'house': 'Stark'})]), 'Filter by house = Stark'
+    assert all([character['house'] == 'Stark' for character in json_db().read_characters(filter={'house': 'stARk'})]), 'Filter by house = stARk'
+    assert all([character['house'] == 'Stark' for character in json_db().read_characters(filter={'hoUSe': 'stARk'})]), 'Filter by hoUSe = stARk'
+    assert all([character['house'] == 'Stark' for character in json_db().read_characters(filter={'hoUSe': 'stARk'})]), 'Filter by hoUSe = tARk'
+    with pytest.raises(ValueError):
+        json_db().read_characters(filter={'planet': 'earth'})
+    assert len(json_db().read_characters(filter={'age_more_than': 50})) == 8
+    assert len(json_db().read_characters(filter={'age_more_than': 50, 'age_less_then': 55})) == 3
+
+
+def test_json_read_characters_sorting(jon_snow, daenerys, olenna_tyrell):
+    assert json_db().read_characters(sorting='id')[0] == jon_snow
+    assert json_db().read_characters(sorting='id', order='sort_asc')[0] == jon_snow
+    assert json_db().read_characters(sorting='id', order='asc')[0] == jon_snow
+    assert json_db().read_characters(sorting='id')[1] == daenerys
+    assert json_db().read_characters(sorting='id', order='desc')[0] == olenna_tyrell
+    assert json_db().read_characters(sorting='id', order='sort_des')[0] == olenna_tyrell
+    with pytest.raises(ValueError):
+        json_db().read_characters(sorting='family')
 
 
 def test_json_create_operation(robert_baratheon):
