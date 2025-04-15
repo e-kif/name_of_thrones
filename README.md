@@ -75,6 +75,8 @@ Coming soon...
 
 1. Required character fields are 'name', 'role' and 'strength' (based on initial characters.json file).
 2. Users are not allowed to modify character's id.
+3. Filter field pair mentioned in assignment *age_more_than* and *age_less_then* are not typos rather an attentiveness test.
+4. If sort order was not provided anolgside with sorting parameter, *sort_asc* is assumed.
 
 
 ## A Programmer’s Oath
