@@ -77,6 +77,7 @@ Coming soon...
 2. Users are not allowed to modify character's id.
 3. Filter field pair mentioned in assignment *age_more_than* and *age_less_then* are not typos rather an attentiveness test.
 4. If sort order was not provided anolgside with sorting parameter, *sort_asc* is assumed.
+5. When sorting in ascending order by optional key *None* values are at the end of the list.
 
 
 ## A Programmer’s Oath
