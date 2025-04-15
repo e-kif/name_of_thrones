@@ -13,9 +13,14 @@ def db():
 def get_characters():
     limit, skip, sorting = request.args.get('limit'), request.args.get('skip'), request.args.get('sorting')
     character_keys = {'name', 'house', 'animal', 'symbol', 'nickname', 'role', 'age', 'death', 'strength'}
-    filter_keys = character_keys.union({'age_more_than', 'age_less_then'})
+    filter_keys = character_keys.difference({'age', 'death'})
     sort_values = character_keys.union({'id'})
-    filter = {key: value for key, value in request.args.items() if key in filter_keys}
+    filter = {key.lower(): value for key, value in request.args.items() if key.lower() in filter_keys}
+    try:
+        [filter.update({key: int(value)}) for key, value in request.args.items() if key in {'age', 'age_more_than', 'age_less_then', 'death'}]
+    except ValueError:
+        return jsonify({'error': 'Age or/and death sould be an integer.'})
+    [filter.update({key: None}) for key, value in filter.items() if value == '']
     order = request.args.get('order')
     if sorting and sorting not in sort_values:
         return jsonify({'error': f'Wrong sorting parameter {sorting}'})
@@ -25,7 +30,9 @@ def get_characters():
     except ValueError:
         return jsonify({'error': 'Limit and skip parameters should be integers.'}), 400
     try:
-        characters = db().read_characters(limit=limit, skip=skip, filter=filter, sorting=sorting, order=order)
+        characters = db().read_characters(limit=limit, skip=skip,
+                                          filter=filter,
+                                          sorting=sorting, order=order)
     except IndexError:
         return jsonify({'error': 'There are no results for given limit and skip parameters.'}), 404
     if characters:
