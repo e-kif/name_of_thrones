@@ -27,16 +27,45 @@ class JSONDataManager(DataManager):
         with open(filename, 'r', encoding='utf8') as file_object:
             return json.load(file_object)
 
-    def read_characters(self, limit: int = None, skip: int = None) -> list:
+    def read_characters(self, limit: int = None, skip: int = None,
+                        filter: dict = None, sorting: str = None,
+                        order: str = None) -> list:
         """Returns current state of the instance storage"""
         if not self.storage:
             return []
-        if not any([limit, skip]) and len(self) >= 20:
+        if not any([limit, skip, order, sorting, filter]) and len(self) >= 20:
             return sorted(sample(self.storage, 20), key=lambda char: char['id'])
-        start, end = limit * skip if skip else 0, limit * (skip + 1) if skip else limit
-        if start >= len(self):
-            raise IndexError
-        return self.storage[start:end]
+        allowed_filer_keys = self.optional_fields.union(self.required_fields)\
+            .union({'age_more_than', 'age_less_than'})
+        characters = self.characters
+        
+        # Filtering part
+        if filter:
+            if any([key for key in filter.keys() if key not in allowed_filer_keys]):
+                raise ValueError
+            characters = [character for character in characters \
+                        if all([character.get(key) == value for key, value in filter.items()])]
+        
+        # Sorting part
+        if sorting:
+            if sorting not in self.optional_fields.union(self.required_fields).union({'id'}):
+                raise ValueError
+            match order:
+                case 'sort_des' | 'desc':
+                    reverse = True
+                case None | 'asc' | 'sort_asc':
+                    reverse = False
+            if sorting:
+                characters.sort(key=lambda k:k[sorting], reverse=reverse)
+
+        # Pagination part
+        if limit:
+            start, end = limit * skip if skip else 0, limit * (skip + 1) if skip else limit
+            if start >= len(self):
+                raise IndexError
+        else:
+            start, end = 0, 20
+        return characters[start:end]
 
     def add_character(self, character) -> dict:
         """Adds new character to the instance storage"""
