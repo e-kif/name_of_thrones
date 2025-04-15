@@ -49,15 +49,11 @@ class JSONDataManager(DataManager):
                         else value == character.get(key) for key, value in filter.items() \
                         if key not in {'age_more_than', 'age_less_then'}])]
             if filter.get('age_more_than'):
-                print('chars before age more', characters, '\n')
                 characters = [character for character in characters if character['age']
                               and character['age'] >= filter['age_more_than']]
-                print('chars after age more', characters, '\n')
             if filter.get('age_less_then'):
-                print('chars before age less', characters, '\n')
                 characters = [character for character in characters if character['age']
                               and character['age']<= filter['age_less_then']]
-                print('chars after age less', characters, '\n')
         
         # Sorting part
         if sorting:
