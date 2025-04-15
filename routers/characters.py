@@ -19,11 +19,11 @@ def get_characters():
     try:
         [filter.update({key: int(value)}) for key, value in request.args.items() if key in {'age', 'age_more_than', 'age_less_then', 'death'}]
     except ValueError:
-        return jsonify({'error': 'Age or/and death sould be an integer.'})
+        return jsonify({'error': 'Age or/and death should be an integer.'}), 400
     [filter.update({key: None}) for key, value in filter.items() if value == '']
     order = request.args.get('order')
     if sorting and sorting not in sort_values:
-        return jsonify({'error': f'Wrong sorting parameter {sorting}'})
+        return jsonify({'error': f'Wrong sorting parameter {sorting}.'}), 400
     
     try:
         limit, skip = int(limit) if limit else None, int(skip) if skip else None

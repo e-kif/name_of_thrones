@@ -24,6 +24,15 @@ def test_read_characters(client, jon_snow, daenerys, olenna_tyrell):
     assert last10.status_code == 200
     assert len(last10.json) == 10, 'Amount of remaining characters is wrong'
     assert last10.json[-1] == olenna_tyrell, 'Last character is wrong'
+    wrong_age_filter_value_type = client.get('/characters/?age=twelve')
+    assert wrong_age_filter_value_type.status_code == 400, 'Wrong status code for wrong age filter value type'
+    assert wrong_age_filter_value_type.json == {'error': 'Age or/and death should be an integer.'}, 'Wrong message for wrong age filter value type'
+    wrong_death_filter_value_type = client.get('/characters/?age=seven')
+    assert wrong_death_filter_value_type.status_code == 400, 'Wrong status code for wrong death filter value type'
+    assert wrong_death_filter_value_type.json == {'error': 'Age or/and death should be an integer.'}, 'Wrong message for wrong death filter value type'
+    wrong_sorting_value = client.get('/characters/?sorting=beauty')
+    assert wrong_sorting_value.status_code == 400, 'Wrong status code for wrong sorting value'
+    assert wrong_sorting_value.json == {'error': 'Wrong sorting parameter beauty.'}, 'Wrong message code for wrong sorting value'
 
 
 def test_read_character(client, jon_snow, daenerys, olenna_tyrell):
