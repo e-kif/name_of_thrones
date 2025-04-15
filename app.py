@@ -21,10 +21,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-    # todo convert character list into dict
     # todo swagger docs
-    # todo sorting
-    # todo filtering
     # todo database models
     # todo pydantic schemas
     # todo postgres database init
