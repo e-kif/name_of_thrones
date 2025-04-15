@@ -36,7 +36,7 @@ class JSONDataManager(DataManager):
         if not any([limit, skip, order, sorting, filter]) and len(self) >= 20:
             return sorted(sample(self.storage, 20), key=lambda char: char['id'])
         allowed_filer_keys = self.optional_fields.union(self.required_fields)\
-            .union({'age_more_than', 'age_less_than'})
+            .union({'age_more_than', 'age_less_then'})
         characters = self.characters
         
         # Filtering part
@@ -44,7 +44,20 @@ class JSONDataManager(DataManager):
             if any([key for key in filter.keys() if key not in allowed_filer_keys]):
                 raise ValueError
             characters = [character for character in characters \
-                        if all([character.get(key) == value for key, value in filter.items()])]
+                        if all([value.lower() in character.get(key).lower() \
+                        if isinstance(character.get(key), str) and isinstance(value, str) \
+                        else value == character.get(key) for key, value in filter.items() \
+                        if key not in {'age_more_than', 'age_less_then'}])]
+            if filter.get('age_more_than'):
+                print('chars before age more', characters, '\n')
+                characters = [character for character in characters if character['age']
+                              and character['age'] >= filter['age_more_than']]
+                print('chars after age more', characters, '\n')
+            if filter.get('age_less_then'):
+                print('chars before age less', characters, '\n')
+                characters = [character for character in characters if character['age']
+                              and character['age']<= filter['age_less_then']]
+                print('chars after age less', characters, '\n')
         
         # Sorting part
         if sorting:
@@ -56,7 +69,7 @@ class JSONDataManager(DataManager):
                 case None | 'asc' | 'sort_asc':
                     reverse = False
             if sorting:
-                characters.sort(key=lambda k:k[sorting], reverse=reverse)
+                characters.sort(key=lambda char: (char[sorting] is None, char[sorting]), reverse=reverse)
 
         # Pagination part
         if limit:
