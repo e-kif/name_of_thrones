@@ -14,6 +14,11 @@ def test_json_read_operations():
         json_db('wrong_file.json')
 
 
+def test_json_read_characters_filters():
+    assert all([character['house'] == None for character in json_db().read_characters(filter={'house': None})])
+    assert all([character['house'] == 'Stark' for character in json_db().read_characters(filter={'house': 'Tyrell'})])
+
+
 def test_json_create_operation(robert_baratheon):
     db = json_db()
     robert_db = db.add_character(robert_baratheon)
