@@ -41,7 +41,7 @@ class JSONDataManager(DataManager):
         
         # Filtering part
         if filter:
-            if any([key for key in filter.keys() if key not in allowed_filer_keys]):
+            if any([key for key in filter.keys() if key.lower() not in allowed_filer_keys]):
                 raise ValueError
             characters = [character for character in characters \
                         if all([value.lower() in character.get(key).lower() \
