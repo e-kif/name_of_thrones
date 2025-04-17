@@ -34,13 +34,14 @@ class JSONDataManager(DataManager):
         if not self.storage:
             return []
         if not any([limit, skip, order, sorting, filter]) and len(self) >= 20:
-            return sorted(sample(self.storage, 20), key=lambda char: char['id'])
-        allowed_filer_keys = self.optional_fields.union(self.required_fields)\
-            .union({'age_more_than', 'age_less_then'})
+            return self._read_random_n_characters(20)
+        
         characters = self.characters
         
         # Filtering part
         if filter:
+            allowed_filer_keys = self.optional_fields.union(self.required_fields)\
+                .union({'age_more_than', 'age_less_then'})    
             if any([key for key in filter.keys() if key.lower() not in allowed_filer_keys]):
                 raise ValueError
             characters = [character for character in characters \
@@ -75,7 +76,10 @@ class JSONDataManager(DataManager):
         else:
             start, end = 0, 20
         return characters[start:end]
-
+    
+    def _read_random_n_characters(self, n: int = 20):
+        return sorted(sample(self.storage, 20), key=lambda char: char['id'])
+        
     def add_character(self, character) -> dict:
         """Adds new character to the instance storage"""
         if character.get('id'):
@@ -91,7 +95,7 @@ class JSONDataManager(DataManager):
         empty_req_fields = [field for field in self.required_fields if character[field] == '']
         if empty_req_fields:
             raise ValueError(f"Character's {', '.join(empty_req_fields)} can not be empty.")
-        if self.character_exists(character['name']):
+        if self._character_exists(character['name']):
             raise ValueError(f'Character {character["name"]} already exists.')
         character.update({'id': self.next_character_index})
         [character.update({key: None}) for key in self.optional_fields
@@ -150,7 +154,7 @@ class JSONDataManager(DataManager):
         """Returns total amount of characters in the instance storage"""
         return len(self.storage)
 
-    def character_exists(self, character_name: str) -> bool:
+    def _character_exists(self, character_name: str) -> bool:
         for character in self.characters:
             if character['name'] == character_name:
                 return True
