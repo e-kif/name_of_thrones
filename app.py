@@ -8,15 +8,14 @@ from data.sql_data_manager import SQLDataManager
 from models.characters import db
 
 
-def create_app(db_path: str = os.path.join('storage', 'characters.json')):
+def create_app(db_path: str = os.path.join('storage', 'characters.json'), use_sql: bool = False):
     """Creates the app, registers all blueprints, return the app"""
     load_dotenv()
     app = Flask(__name__)
 
-    use_postgres_database = True
-
-    if use_postgres_database:
+    if use_sql:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         db.init_app(app)
 
         with app.app_context():
@@ -34,7 +33,7 @@ def create_app(db_path: str = os.path.join('storage', 'characters.json')):
 
 def main():
     """Main function that starts the app"""
-    app = create_app()
+    app = create_app(use_sql=True)
     app.run(debug=True)
 
 

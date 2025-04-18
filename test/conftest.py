@@ -5,6 +5,16 @@ import json
 from app import create_app
 
 
+
+# def test_app(db_uri, use_sql: bool = True):
+#     if use_sql:
+#         app = create_app(db_uri)
+#     else:
+#         app = create_app(db_uri)
+#     app.config['TESTING'] = True
+#     return app
+
+
 @pytest.fixture(scope='function')
 def client():
     """Test client setup with temporary database file"""
@@ -15,7 +25,6 @@ def client():
             f.write(json.dumps(json.loads(original.read())))
 
     app = create_app(db_path)
-    app.config['TESTING'] = True
 
     with app.test_client() as client:
         yield client
@@ -23,6 +32,17 @@ def client():
     os.close(db_fd)
     os.remove(db_path)
 
+
+@pytest.fixture(scope='function')
+def sql_db():
+    db_uri = 'postgres://user:password@host/mock_db'
+    db_uri = 'sqlite:///:memory:'
+    app = create_app(db_uri, use_sql=True)
+    app.config['TESTING'] = True
+    # db.init_app(app)
+    with app.app_context():
+        yield app.data_manager
+    
 
 @pytest.fixture()
 def jon_snow():

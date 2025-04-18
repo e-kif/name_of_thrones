@@ -20,11 +20,14 @@ class SQLDataManager(DataManager):
             self.add_character(character, refresh=False)
 
     def read_character(self, character_id: int):
+        """Returns a character with id = caracter_id or an error message
+        if character was not found
+        """
         try:
             db_character = self.session.query(Characters).filter_by(id=character_id).one().dict
             return db_character
         except exc.NoResultFound:
-            return {'message': f'Character with id={character_id} was not found.'}, 404
+            return {'error': f'Character with id={character_id} was not found.'}, 404
 
     def read_characters(self, limit: int = None, skip: int = None, filter: dict = None, sorting: str = None, order: str = None):
         print(f'{limit=} {sorting=} {filter=}, {order=}')
@@ -94,10 +97,3 @@ class SQLDataManager(DataManager):
     #         return {'message': 'A database error occurred.', 'error': str(error)}, 500
     #     return instance, 200
         
-
-if __name__ == '__main__':
-    load_dotenv()
-    db_uri = os.getenv('DATABASE_URI')
-    db = SQLDataManager(db_uri)
-    db._reset_database()
-    # print(db.read_characters())
