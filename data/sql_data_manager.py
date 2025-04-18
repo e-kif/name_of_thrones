@@ -1,4 +1,4 @@
-from sqlalchemy import exc
+from sqlalchemy import exc, desc
 from sqlalchemy.sql import func
 from data.data_manager import DataManager
 from models.characters import *
@@ -38,6 +38,9 @@ class SQLDataManager(DataManager):
         
         if filter:
             query = self._apply_filter(query, filter)
+
+        if sorting:
+            query = self._apply_sorting(query, sorting, order)
         characters = query.order_by(Characters.id).limit(limit).offset(skip).all()
         return [character.dict for character in characters]
     
@@ -46,11 +49,11 @@ class SQLDataManager(DataManager):
         for key, value in filter.items():
             key = key.lower()
             attribute = getattr(model, key, None)
+            
             if key == 'age_more_than':
                 query = query.filter(Characters.age >= value)
                 continue
             if key in {'age_less_then', 'age_less_than'}:
-                print('HERE')
                 query = query.filter(Characters.age <= value)
                 continue
 
@@ -61,11 +64,17 @@ class SQLDataManager(DataManager):
                     query = query.filter(func.lower(attribute) == value.lower())
                 case _:
                     query = query.filter(attribute == value)
-
         return query
-
-            
-
+    
+    @staticmethod
+    def _apply_sorting(query, sorting, order, model = Characters):
+        sort_properties = {'id', 'name', 'house', 'age', 'death', 'nickname',
+                           'role', 'strength', 'animal', 'symbol'}
+        if sorting not in sort_properties:
+            raise AttributeError(f'Wrong soring parameter provided: {sorting}.')
+        if order in {'desc', 'sort_des'}:
+            return query.order_by(desc(getattr(Characters, sorting)))
+        return query.order_by(getattr(Characters, sorting))
 
     def _read_random_n_characters(self, n: int):
         """Returns random n characters ordered by id. If n >= character count in database -

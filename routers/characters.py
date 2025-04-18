@@ -37,6 +37,8 @@ def get_characters():
                                           sorting=sorting, order=order)
     except IndexError:
         return jsonify({'error': 'There are no results for given limit and skip parameters.'}), 404
+    except AttributeError as error:
+        return jsonify({'error': str(error)}), 409
     if characters:
         return jsonify(characters), 200
     else:
