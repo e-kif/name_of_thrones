@@ -17,7 +17,9 @@ def get_characters():
     sort_values = character_keys.union({'id'})
     filter = {key.lower(): value for key, value in request.args.items() if key.lower() in filter_keys}
     try:
-        [filter.update({key: int(value)}) for key, value in request.args.items() if key in {'age', 'age_more_than', 'age_less_then', 'death'}]
+        [filter.update({key: int(value)}) for key, value in request.args.items()
+         if key in {'age', 'age_more_than', 'age_less_then', 'death', 'age_less_than'} and value.strip() != '']
+        [filter.update({key: None}) for key, value in request.args.items() if value.strip() == '']
     except ValueError:
         return jsonify({'error': 'Age or/and death should be an integer.'}), 400
     [filter.update({key: None}) for key, value in filter.items() if value == '']

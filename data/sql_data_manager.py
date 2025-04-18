@@ -46,6 +46,13 @@ class SQLDataManager(DataManager):
         for key, value in filter.items():
             key = key.lower()
             attribute = getattr(model, key, None)
+            if key == 'age_more_than':
+                query = query.filter(Characters.age >= value)
+                continue
+            if key in {'age_less_then', 'age_less_than'}:
+                print('HERE')
+                query = query.filter(Characters.age <= value)
+                continue
 
             match value:
                 case str() if value.strip() == '':
