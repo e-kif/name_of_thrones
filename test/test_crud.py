@@ -117,10 +117,10 @@ def test_sql_read_characters_sorting(sql_db, jon_snow, daenerys, olenna_tyrell):
 def test_sql_create_operation(sql_db, robert_baratheon):
     robert_db = sql_db.add_character(robert_baratheon)
     assert len(sql_db) == 51, 'Character was not added'
-    assert robert_db.get('id'), 'New character does not have "id" key'
-    assert robert_db['id'] == 51, 'New character id is wrong'
-    assert robert_db.get('nickname') is None, 'Omitted optional field was not created'
-    assert robert_db['nickname'] is None, 'Omitted optional field has wrong value'
+    assert getattr(robert_db, 'id'), 'New character does not have "id" key'
+    assert robert_db.id == 51, 'New character id is wrong'
+    assert robert_db.nickname is None, 'Omitted optional field was not created'
+    assert robert_db.nickname is None, 'Omitted optional field has wrong value'
     with pytest.raises(ValueError):
         sql_db.add_character({'id': 55, 'name': 'Mock', 'role': 'Mocker', 'strength': 'Mocking'})
     with pytest.raises(ValueError):

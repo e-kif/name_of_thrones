@@ -17,6 +17,7 @@ class SQLDataManager(DataManager):
         self.db.drop_all()
         self.db.create_all()
         for character in json_characters:
+            del character['id']
             self.add_character(character, refresh=False)
 
     def read_character(self, character_id: int):
@@ -46,8 +47,12 @@ class SQLDataManager(DataManager):
     
     @staticmethod
     def _apply_filter(query, filter, model=Characters):
+        allowed_parameters = {'name', 'house', 'nickname', 'age', 'role', 'age_more_than',
+                              'age_less_then', 'age_less_than', 'symbol', 'animal', 'death', 'strength'}
         for key, value in filter.items():
             key = key.lower()
+            if key not in allowed_parameters:
+                raise ValueError(f'Parameter {key} is not allowed.')
             attribute = getattr(model, key, None)
             
             if key == 'age_more_than':
@@ -71,7 +76,7 @@ class SQLDataManager(DataManager):
         sort_properties = {'id', 'name', 'house', 'age', 'death', 'nickname',
                            'role', 'strength', 'animal', 'symbol'}
         if sorting not in sort_properties:
-            raise AttributeError(f'Wrong soring parameter provided: {sorting}.')
+            raise ValueError(f'Wrong soring parameter provided: {sorting}.')
         if order in {'desc', 'sort_des'}:
             return query.order_by(desc(getattr(Characters, sorting)))
         return query.order_by(getattr(Characters, sorting))
@@ -79,7 +84,7 @@ class SQLDataManager(DataManager):
     def _read_random_n_characters(self, n: int):
         """Returns random n characters ordered by id. If n >= character count in database -
         returns all database characters"""
-        character_amount = self.session.query(func.count(Characters.id)).scalar()
+        character_amount = len(self)
         n = n if n < character_amount else character_amount
         characters = self.session.query(Characters).order_by(func.random()).limit(n).all()
         return sorted([character.dict for character in characters], key=lambda char: char['id'])
@@ -114,6 +119,9 @@ class SQLDataManager(DataManager):
 
     def update_character(self, character_id, character):
         pass
+
+    def __len__(self):
+        return self.session.query(func.count(Characters.id)).scalar()
 
     # def _add(self, instance, refresh: bool = True):
     #     """Add instance to database with error handling and db rollbacks"""
