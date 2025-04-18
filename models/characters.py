@@ -1,7 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, object_session
 from sqlalchemy.ext.hybrid import hybrid_property
-from flask import current_app
+# from flask import current_app
+from sqlalchemy import select
 
 
 class Base(DeclarativeBase):
@@ -32,7 +33,10 @@ character_animal = db.Table(
     )
 
 
-def dynamic_hybrid_property(property_name, attribute_name, model_class, always_create_new_record: bool = False):
+def dynamic_hybrid_property(property_name, attribute_name, model_class,
+                            remote_id: str = None, local_id: str = 'character_id',
+                            always_create_new_record: bool = False,
+                            secondary_table=None):
     """Dynamically creates a hybrid property for related entities"""
 
     def field_getter(self):
@@ -60,8 +64,16 @@ def dynamic_hybrid_property(property_name, attribute_name, model_class, always_c
             setattr(self, attribute_name, resolve(value))
 
     def field_expression(cls):
-        relation = getattr(cls, attribute_name)
-        return getattr(model_class, property_name)
+        query = select(getattr(model_class, property_name))
+        
+        if secondary_table is not None:
+            query = query.join(secondary_table,
+                               secondary_table.c[remote_id] == getattr(model_class, 'id'))\
+            .where(secondary_table.c[local_id] == cls.id)
+        else:
+            query = query.where(getattr(model_class, local_id) == cls.id)
+            
+        return query.correlate(cls).scalar_subquery()
     
     return hybrid_property(fget=field_getter, fset=field_setter).expression(field_expression)
     
@@ -130,10 +142,10 @@ class Characters(db.Model):
     ages = db.relationship('Age', uselist=False, backref='character')
     deaths = db.relationship('Death', uselist=False, backref='character')
 
-    house = dynamic_hybrid_property('name', 'houses', Houses)
+    house = dynamic_hybrid_property('name', 'houses', Houses, remote_id='house_id', secondary_table=character_house)
+    symbol = dynamic_hybrid_property('name', 'symbols', Symbols, remote_id='symbol_id', secondary_table=character_symbol)
+    animal = dynamic_hybrid_property('name', 'animals', Animals, remote_id='animal_id', secondary_table=character_animal)
     nickname = dynamic_hybrid_property('name', 'nicknames', Nicknames, always_create_new_record=True)
-    symbol = dynamic_hybrid_property('name', 'symbols', Symbols)
-    animal = dynamic_hybrid_property('name', 'animals', Animals)
     age = dynamic_hybrid_property('age', 'ages', Age, always_create_new_record=True)
     death = dynamic_hybrid_property('death', 'deaths', Death, always_create_new_record=True)
     
