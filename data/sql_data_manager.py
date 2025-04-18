@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, exc
+from sqlalchemy import exc
 from sqlalchemy.sql import func
 from data.data_manager import DataManager
 from models.characters import *
@@ -24,18 +24,42 @@ class SQLDataManager(DataManager):
         if character was not found
         """
         try:
-            db_character = self.session.query(Characters).filter_by(id=character_id).one().dict
+            db_character = self.session.query(Characters)\
+                .filter_by(id=character_id).one().dict
             return db_character
         except exc.NoResultFound:
             return {'error': f'Character with id={character_id} was not found.'}, 404
 
-    def read_characters(self, limit: int = None, skip: int = None, filter: dict = None, sorting: str = None, order: str = None):
-        print(f'{limit=} {sorting=} {filter=}, {order=}')
+    def read_characters(self, limit: int = None, skip: int = None,
+                        filter: dict = None, sorting: str = None, order: str = None):
         if all([limit is None, sorting is None, not filter, order is None]):
             return self._read_random_n_characters(20)
-        characters = self.session.query(Characters).order_by(Characters.id).limit(limit).offset(skip).all()
+        query = self.session.query(Characters)
+        
+        if filter:
+            query = self._apply_filter(query, filter)
+        characters = query.order_by(Characters.id).limit(limit).offset(skip).all()
         return [character.dict for character in characters]
     
+    @staticmethod
+    def _apply_filter(query, filter, model=Characters):
+        for key, value in filter.items():
+            key = key.lower()
+            attribute = getattr(model, key, None)
+
+            match value:
+                case str() if value.strip() == '':
+                    query = query.filter(attribute.is_(None))
+                case str():
+                    query = query.filter(func.lower(attribute) == value.lower())
+                case _:
+                    query = query.filter(attribute == value)
+
+        return query
+
+            
+
+
     def _read_random_n_characters(self, n: int):
         """Returns random n characters ordered by id. If n >= character count in database -
         returns all database characters"""
@@ -47,8 +71,10 @@ class SQLDataManager(DataManager):
     def add_character(self, character: dict, refresh: bool = True):
         required_fields = {'name', 'role', 'strength'}
         optional_fields = {'animal', 'age', 'house', 'death', 'symbol', 'nickname'}
-        character_req = {key: value for key, value in character.items() if value is not None and key in required_fields}
-        character_opt = {key: value for key, value in character.items() if value is not None and key in optional_fields}
+        character_req = {key: value for key, value in character.items()\
+                         if value is not None and key in required_fields}
+        character_opt = {key: value for key, value in character.items()\
+                         if value is not None and key in optional_fields}
         add_character = Characters(**character_req)
         try:
             self.session.add(add_character)
