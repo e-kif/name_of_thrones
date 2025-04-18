@@ -30,7 +30,7 @@ class SQLDataManager(DataManager):
         print(f'{limit=} {sorting=} {filter=}, {order=}')
         if all([limit is None, sorting is None, not filter, order is None]):
             return self._read_random_n_characters(20)
-        characters = self.session.query(Characters).all()
+        characters = self.session.query(Characters).order_by(Characters.id).limit(limit).offset(skip).all()
         return [character.dict for character in characters]
     
     def _read_random_n_characters(self, n: int):
