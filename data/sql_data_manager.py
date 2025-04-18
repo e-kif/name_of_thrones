@@ -1,6 +1,5 @@
-import os
-from dotenv import load_dotenv
 from sqlalchemy import create_engine, exc
+from sqlalchemy.sql import func
 from data.data_manager import DataManager
 from models.characters import *
 from data.json_data_manager import JSONDataManager
@@ -27,10 +26,20 @@ class SQLDataManager(DataManager):
         except exc.NoResultFound:
             return {'message': f'Character with id={character_id} was not found.'}, 404
 
-    def read_characters(self, limit: int = 20, skip: int = 0, filter: dict = None, sorting: str = None, order: str = None):
+    def read_characters(self, limit: int = None, skip: int = None, filter: dict = None, sorting: str = None, order: str = None):
+        print(f'{limit=} {sorting=} {filter=}, {order=}')
+        if all([limit is None, sorting is None, not filter, order is None]):
+            return self._read_random_n_characters(20)
         characters = self.session.query(Characters).all()
-        print(type(characters))
         return [character.dict for character in characters]
+    
+    def _read_random_n_characters(self, n: int):
+        """Returns random n characters ordered by id. If n >= character count in database -
+        returns all database characters"""
+        character_amount = self.session.query(func.count(Characters.id)).scalar()
+        n = n if n < character_amount else character_amount
+        characters = self.session.query(Characters).order_by(func.random()).limit(n).all()
+        return sorted([character.dict for character in characters], key=lambda char: char['id'])
 
     def add_character(self, character: dict, refresh: bool = True):
         required_fields = {'name', 'role', 'strength'}
