@@ -13,21 +13,21 @@ db = SQLAlchemy(model_class=Base)
 
 character_house = db.Table(
     'character_house',
-    db.Column('character_id', db.Integer, db.ForeignKey('characters.id'), primary_key=True),
+    db.Column('character_id', db.Integer, db.ForeignKey('characters.id', ondelete='CASCADE'), primary_key=True),
     db.Column('house_id', db.Integer, db.ForeignKey('houses.id'), nullable=False),
     db.UniqueConstraint('character_id', name='unique_character_constraint_house')
     )
 
 character_symbol = db.Table(
     'character_symbol',
-    db.Column('character_id', db.Integer, db.ForeignKey('characters.id'), primary_key=True),
+    db.Column('character_id', db.Integer, db.ForeignKey('characters.id', ondelete='CASCADE'), primary_key=True),
     db.Column('symbol_id', db.Integer, db.ForeignKey('symbols.id'), nullable=False),
     db.UniqueConstraint('character_id', name='unique_character_constraint_symbol')
     )
 
 character_animal = db.Table(
     'character_animal',
-    db.Column('character_id', db.Integer, db.ForeignKey('characters.id'), primary_key=True),
+    db.Column('character_id', db.Integer, db.ForeignKey('characters.id', ondelete='CASCADE'), primary_key=True),
     db.Column('animal_id', db.Integer, db.ForeignKey('animals.id'), nullable=False),
     db.UniqueConstraint('character_id', name='unique_character_constraint_animal')
     )
@@ -135,12 +135,12 @@ class Characters(db.Model):
     role: Mapped[str] = mapped_column(nullable=False)
     strength: Mapped[str] = mapped_column(nullable=False)
 
-    houses = db.relationship('Houses', secondary=character_house, uselist=False, backref='residents')
-    nicknames = db.relationship('Nicknames', uselist=False, backref='characters')
-    symbols = db.relationship('Symbols', secondary=character_symbol, uselist=False, backref='characters')
-    animals = db.relationship('Animals', secondary=character_animal, uselist=False, backref='characters')
-    ages = db.relationship('Age', uselist=False, backref='character')
-    deaths = db.relationship('Death', uselist=False, backref='character')
+    houses = db.relationship('Houses', secondary=character_house, uselist=False, backref='residents', passive_deletes=True)
+    nicknames = db.relationship('Nicknames', uselist=False, backref='characters', cascade='all, delete-orphan')
+    symbols = db.relationship('Symbols', secondary=character_symbol, uselist=False, backref='characters', passive_deletes=True)
+    animals = db.relationship('Animals', secondary=character_animal, uselist=False, backref='characters', passive_deletes=True)
+    ages = db.relationship('Age', uselist=False, backref='character', cascade='all, delete-orphan')
+    deaths = db.relationship('Death', uselist=False, backref='character', cascade='all, delete-orphan')
 
     house = dynamic_hybrid_property('name', 'houses', Houses, remote_id='house_id', secondary_table=character_house)
     symbol = dynamic_hybrid_property('name', 'symbols', Symbols, remote_id='symbol_id', secondary_table=character_symbol)
