@@ -97,7 +97,7 @@ class JSONDataManager(DataManager):
         if self._character_exists(character['name']):
             raise ValueError(f'Character {character["name"]} already exists.')
         character.update({'id': self.next_character_index})
-        [character.update({key: None}) for key in self.optional_fields
+        [character.update({key: None}) for key in self.opt_fields
          if key not in character.keys()]
         print(f'{character=}')
         self.storage.append(character)
