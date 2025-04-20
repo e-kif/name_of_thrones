@@ -90,7 +90,12 @@ class SQLDataManager(DataManager):
         return sorted([character.dict for character in characters], key=lambda char: char['id'])
 
     def add_character(self, character: dict, refresh: bool = True):
+        if character.get('id'):
+            raise ValueError('New character id should not be provided.')
         required_fields = {'name', 'role', 'strength'}
+        if not all([key in character for key in required_fields])\
+            or not all([value.strip() for key, value in character.items() if key in required_fields]):
+            raise ValueError('Required field was not provided.')
         optional_fields = {'animal', 'age', 'house', 'death', 'symbol', 'nickname'}
         character_req = {key: value for key, value in character.items()\
                          if value is not None and key in required_fields}
