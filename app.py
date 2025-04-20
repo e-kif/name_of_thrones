@@ -40,6 +40,9 @@ def main():
 if __name__ == '__main__':
     main()
 
+    # refactor fields checks for sql/json
+    # refactor endpoint return type (json -> tuple)
+    # endpoints error handling (404, 500)
     # todo swagger docs
     # todo pydantic schemas
     # todo user list + database counterpart
@@ -49,6 +52,3 @@ if __name__ == '__main__':
     # todo update readme
     # todo deploy
     # todo ci/cd workflow
-
-
-# = os.path.join('storage', 'characters.json')

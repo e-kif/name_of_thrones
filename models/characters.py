@@ -130,6 +130,11 @@ class Nicknames(db.Model):
     
 
 class Characters(db.Model):
+
+    req_fields = {'name', 'role', 'strength'}
+    opt_fields = {'house', 'symbol', 'animal', 'nickname', 'age', 'death'}
+    allowed_fields = req_fields.union(opt_fields)
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
     role: Mapped[str] = mapped_column(nullable=False)

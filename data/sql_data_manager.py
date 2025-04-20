@@ -127,7 +127,17 @@ class SQLDataManager(DataManager):
         return self._delete(rem_character)
 
     def update_character(self, character_id, character):
-        pass
+        wrong_fields = [key for key in character if key not in Characters.allowed_fields]
+        if wrong_fields:
+            raise AttributeError(f'Not allowed filed(s): {", ".join(wrong_fields)}.')
+        if 'id' in character.keys():
+            raise AttributeError('Updating ID field is not allowed.')
+        upd_character = self.read_character(character_id, return_object=True)
+        [setattr(upd_character, key, value) for key, value in character.items()]
+        self.session.commit()
+        self.session.refresh(upd_character)
+        return upd_character.dict
+
 
     def __len__(self):
         return self.session.query(func.count(Characters.id)).scalar()
