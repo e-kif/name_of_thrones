@@ -21,13 +21,13 @@ class SQLDataManager(DataManager):
             self.add_character(character, refresh=False)
 
     def read_character(self, character_id: int, return_object=False):
-        """Returns a character with id = caracter_id or an error message
+        """Returns a character with id = character_id or an error message
         if character was not found
         """
         try:
             db_character = self.session.query(Characters)\
                 .filter_by(id=character_id).one()
-            return db_character if return_object else db_character.dict
+            return db_character if return_object else db_character.dict, 200
         except exc.NoResultFound:
             return {'error': f'Character with id={character_id} was not found.'}, 404
 
@@ -43,15 +43,14 @@ class SQLDataManager(DataManager):
         if sorting:
             query = self._apply_sorting(query, sorting, order)
         characters = query.order_by(Characters.id).limit(limit).offset(skip).all()
-        return [character.dict for character in characters]
+        return [character.dict for character in characters], 200 if characters else [], 404
     
     @staticmethod
     def _apply_filter(query, filter, model=Characters):
-        allowed_parameters = {'name', 'house', 'nickname', 'age', 'role', 'age_more_than',
-                              'age_less_then', 'age_less_than', 'symbol', 'animal', 'death', 'strength'}
+        allowed_filter_fields = Characters.allowed_fields.union({'age_less_than', 'age_less_then', 'age_more_than'})
         for key, value in filter.items():
             key = key.lower()
-            if key not in allowed_parameters:
+            if key not in allowed_filter_fields:
                 raise ValueError(f'Parameter {key} is not allowed.')
             attribute = getattr(model, key, None)
             
@@ -73,10 +72,9 @@ class SQLDataManager(DataManager):
     
     @staticmethod
     def _apply_sorting(query, sorting, order, model = Characters):
-        sort_properties = {'id', 'name', 'house', 'age', 'death', 'nickname',
-                           'role', 'strength', 'animal', 'symbol'}
+        sort_properties = Characters.allowed_fields.union({'id'})
         if sorting not in sort_properties:
-            raise ValueError(f'Wrong soring parameter provided: {sorting}.')
+            raise ValueError(f'Wrong sorting parameter provided: {sorting}.')
         if order in {'desc', 'sort_des'}:
             return query.order_by(desc(getattr(Characters, sorting)))
         return query.order_by(getattr(Characters, sorting))
@@ -90,17 +88,18 @@ class SQLDataManager(DataManager):
         return sorted([character.dict for character in characters], key=lambda char: char['id'])
 
     def add_character(self, character: dict, refresh: bool = True):
-        if character.get('id'):
+        if 'id' in character.keys():
             raise ValueError('New character id should not be provided.')
-        required_fields = {'name', 'role', 'strength'}
-        if not all([key in character for key in required_fields])\
-            or not all([value.strip() for key, value in character.items() if key in required_fields]):
-            raise ValueError('Required field was not provided.')
-        optional_fields = {'animal', 'age', 'house', 'death', 'symbol', 'nickname'}
+        missing_req_fields = Characters.req_fields.difference(set(character.keys()))
+        empty_req_fields = [key for key in Characters.req_fields if character[key].strip() == '']        
+        if missing_req_fields:
+            raise ValueError(f'Missing required character field(s): {", ".join(missing_req_fields)}.')
+        if empty_req_fields:
+            raise ValueError(f'Empty required character field(s): {", ".join(empty_req_fields)}.')
         character_req = {key: value for key, value in character.items()\
-                         if value is not None and key in required_fields}
+                         if value is not None and key in Characters.req_fields}
         character_opt = {key: value for key, value in character.items()\
-                         if value is not None and key in optional_fields}
+                         if value is not None and key in Characters.opt_fields}
         add_character = Characters(**character_req)
         try:
             self.session.add(add_character)
@@ -110,7 +109,7 @@ class SQLDataManager(DataManager):
             self.session.commit()
             if refresh:
                 self.session.refresh(add_character)
-            return add_character if refresh else character
+            return add_character, 201 if refresh else character, 201
         except exc.IntegrityError as error:
             self.session.rollback()
             return {'message': 'Integrity error occurred.', 'error': str(error)}, 409
@@ -124,40 +123,31 @@ class SQLDataManager(DataManager):
         rem_character = self.read_character(character_id, return_object=True)
         if isinstance(rem_character, tuple):
             raise KeyError(rem_character)
-        return self._delete(rem_character)
+        return self._delete(rem_character), 200
 
     def update_character(self, character_id, character):
-        wrong_fields = [key for key in character if key not in Characters.allowed_fields]
-        if wrong_fields:
-            raise AttributeError(f'Not allowed filed(s): {", ".join(wrong_fields)}.')
-        if 'id' in character.keys():
+        wrong_fields = set(character.keys()).difference(Characters.allowed_fields)
+        if 'id' in wrong_fields:
             raise AttributeError('Updating ID field is not allowed.')
+        if wrong_fields:
+            raise AttributeError(f'Not allowed filed(s): {", ".join(wrong_fields.difference({"id"}))}.')
+        if self._character_exists(character.get('name')):
+            raise AttributeError(f'Character {character["name"]} already exists.')
         upd_character = self.read_character(character_id, return_object=True)
         [setattr(upd_character, key, value) for key, value in character.items()]
-        self.session.commit()
-        self.session.refresh(upd_character)
-        return upd_character.dict
-
+        try:
+            self.session.commit()
+            self.session.refresh(upd_character)
+        except exc.IntegrityError:
+            self.session.rollback()
+            raise exc.IntegrityError
+        return upd_character.dict, 200
 
     def __len__(self):
         return self.session.query(func.count(Characters.id)).scalar()
-
-    # def _add(self, instance, refresh: bool = True):
-    #     """Add instance to database with error handling and db rollbacks"""
-    #     try:
-    #         self.session.add(instance)
-    #         self.session.commit()
-    #     except exc.IntegrityError as error:
-    #         db.session.rollback()
-    #         return {'message': 'Integrity error occurred.', 'error': str(error)}, 409
-    #     except exc.SQLAlchemyError as error:
-    #         db.session.rollback()
-    #         return {'message': f'A database error occurred.', 'error': str(error)}, 500
-    #     if refresh:
-    #         return self.session.refresh(instance), 201
         
     def _delete(self, instance):
-        """Delete an instance from the database with wrror handling and rollback"""
+        """Delete an instance from the database with error handling and rollback"""
         instance_dict = instance.dict
         try:
             self.session.delete(instance)
@@ -166,4 +156,10 @@ class SQLDataManager(DataManager):
             self.session.rollback()
             return {'message': 'A database error occurred.', 'error': str(error)}, 500
         return instance_dict, 200
-        
+    
+    def _character_exists(self, name: str) -> bool:
+        try:
+            character = self.session.query(Characters).filter(name=name).first()
+            return True
+        except exc.NoResultFound:
+            return False
