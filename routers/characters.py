@@ -40,7 +40,7 @@ def get_characters():
     except AttributeError as error:
         return jsonify({'error': str(error)}), 409
     if characters:
-        return jsonify(characters), 200
+        return jsonify(characters[0]), characters[1]
     else:
         return jsonify([]), 404
 
@@ -49,7 +49,7 @@ def get_characters():
 def get_character(character_id: int) -> CharacterOut:
     try:
         character = db().read_character(character_id)
-        return jsonify(character), 200
+        return jsonify(character[0]), character[1]
     except KeyError as error:
         return jsonify({'error': error.args[0]}), 404
 
@@ -58,7 +58,8 @@ def get_character(character_id: int) -> CharacterOut:
 def add_character() -> CharacterOut:
     new_character = request.get_json()
     try:
-        return db().add_character(new_character), 201
+        db_character = db().add_character(new_character)
+        return jsonify(db_character[0]), db_character[1]
     except ValueError as error:
         return jsonify({'error': error.args[0]}), 400
 
@@ -67,7 +68,7 @@ def add_character() -> CharacterOut:
 def remove_character(character_id: int) -> CharacterOut:
     try:
         removed_character = db().remove_character(character_id)
-        return jsonify({'removed character': removed_character}), 200
+        return jsonify(removed_character[0]), removed_character[1]
     except KeyError as error:
         return jsonify({'error': error.args[0]}), 404
 
@@ -77,7 +78,7 @@ def update_character(character_id: int) -> CharacterOut:
     updated_character = request.get_json()
     try:
         db_character = db().update_character(character_id, updated_character)
-        return db_character
+        return db_character[0], db_character[1]
     except KeyError as error:
         return jsonify({'error': error.args[0]}), 404
     except AttributeError as error:
