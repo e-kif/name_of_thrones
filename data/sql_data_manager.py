@@ -27,14 +27,14 @@ class SQLDataManager(DataManager):
         try:
             db_character = self.session.query(Characters)\
                 .filter_by(id=character_id).one()
-            return db_character if return_object else db_character.dict, 200
+            return db_character if return_object else (db_character.dict, 200)
         except exc.NoResultFound:
             return {'error': f'Character with id={character_id} was not found.'}, 404
 
     def read_characters(self, limit: int = None, skip: int = None,
                         filter: dict = None, sorting: str = None, order: str = None):
         if all([limit is None, sorting is None, not filter, order is None]):
-            return self._read_random_n_characters(20)
+            return self._read_random_n_characters(20), 200
         query = self.session.query(Characters)
         
         if filter:
@@ -91,9 +91,9 @@ class SQLDataManager(DataManager):
         if 'id' in character.keys():
             raise ValueError('New character id should not be provided.')
         missing_req_fields = Characters.req_fields.difference(set(character.keys()))
-        empty_req_fields = [key for key in Characters.req_fields if character[key].strip() == '']        
         if missing_req_fields:
             raise ValueError(f'Missing required character field(s): {", ".join(missing_req_fields)}.')
+        empty_req_fields = [key for key in Characters.req_fields if character[key].strip() == '']        
         if empty_req_fields:
             raise ValueError(f'Empty required character field(s): {", ".join(empty_req_fields)}.')
         character_req = {key: value for key, value in character.items()\
@@ -121,9 +121,9 @@ class SQLDataManager(DataManager):
         if not isinstance(character_id, int):
             raise TypeError
         rem_character = self.read_character(character_id, return_object=True)
-        if isinstance(rem_character, tuple):
+        if isinstance(rem_character, tuple) and rem_character[1] == 404:
             raise KeyError(rem_character)
-        return self._delete(rem_character), 200
+        return self._delete(rem_character)
 
     def update_character(self, character_id, character):
         wrong_fields = set(character.keys()).difference(Characters.allowed_fields)
@@ -157,9 +157,9 @@ class SQLDataManager(DataManager):
             return {'message': 'A database error occurred.', 'error': str(error)}, 500
         return instance_dict, 200
     
-    def _character_exists(self, name: str) -> bool:
+    def _character_exists(self, character_name: str) -> bool:
         try:
-            character = self.session.query(Characters).filter(name=name).first()
+            character = self.session.query(Characters).filter_by(name=character_name).one()
             return True
         except exc.NoResultFound:
             return False
