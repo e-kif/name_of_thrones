@@ -6,8 +6,9 @@ from data.data_manager import DataManager
 
 class JSONDataManager(DataManager):
     """Data manager for interacting with JSON type storage"""
-    optional_fields = {'nickname', 'death', 'symbol', 'house', 'animal', 'age'}
-    required_fields = {'name', 'strength', 'role'}
+    opt_fields = {'nickname', 'death', 'symbol', 'house', 'animal', 'age'}
+    req_fields = {'name', 'strength', 'role'}
+    allowed_fields = req_fields.union(opt_fields)
 
     def __init__(
             self,
@@ -40,8 +41,7 @@ class JSONDataManager(DataManager):
         
         # Filtering part
         if filter:
-            allowed_filer_keys = self.optional_fields.union(self.required_fields)\
-                .union({'age_more_than', 'age_less_then'})    
+            allowed_filer_keys = self.allowed_fields.union({'age_more_than', 'age_less_then', 'age_less_than'})
             if any([key for key in filter.keys() if key.lower() not in allowed_filer_keys]):
                 raise ValueError
             characters = [character for character in characters \
@@ -58,7 +58,7 @@ class JSONDataManager(DataManager):
         
         # Sorting part
         if sorting:
-            if sorting not in self.optional_fields.union(self.required_fields).union({'id'}):
+            if sorting not in self.allowed_fields.union({'id'}):
                 raise ValueError
             match order:
                 case 'sort_des' | 'desc':
@@ -82,17 +82,16 @@ class JSONDataManager(DataManager):
         
     def add_character(self, character) -> dict:
         """Adds new character to the instance storage"""
-        if character.get('id'):
+        if 'id' in character.keys():
             raise ValueError('Character id should not be provided.')
-        missing_required_fields = self.required_fields\
-            .difference(set(character.keys()))
+        missing_required_fields = self.req_fields.difference(set(character.keys()))
         if missing_required_fields:
             raise ValueError('Missing required field(s): '
                              f'{", ".join(missing_required_fields)}.')
-        not_defined_req_fields = [field for field in self.required_fields if character[field] is None]
+        not_defined_req_fields = [field for field in self.req_fields if character[field] is None]
         if not_defined_req_fields:
             raise ValueError(f"Character's {', '.join(not_defined_req_fields)} can not be None.")
-        empty_req_fields = [field for field in self.required_fields if character[field] == '']
+        empty_req_fields = [field for field in self.req_fields if character[field].strip() == '']
         if empty_req_fields:
             raise ValueError(f"Character's {', '.join(empty_req_fields)} can not be empty.")
         if self._character_exists(character['name']):
@@ -135,12 +134,12 @@ class JSONDataManager(DataManager):
         """Updates character info for the character with id=character_id"""
         if character.get('id'):
             raise AttributeError('Character id is not allowed to be changed.')
-        not_allowed_keys = set(character.keys())\
-            .difference(self.optional_fields)\
-            .difference(self.required_fields)
+        not_allowed_keys = set(character.keys()).difference(self.allowed_fields)
         if not_allowed_keys:
             raise AttributeError('Not allowed key(s): '
                                  f'{", ".join(not_allowed_keys)}.')
+        if 'name' in character.keys() and self._character_exists(character['name']):
+            raise AttributeError(f'Character {character["id"]} already exists.')
         db_character = self.read_character(character_id)
         db_character.update(character)
         return db_character
