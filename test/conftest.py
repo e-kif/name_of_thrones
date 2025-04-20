@@ -35,11 +35,10 @@ def client():
 
 @pytest.fixture(scope='function')
 def sql_db():
-    db_uri = 'postgres://user:password@host/mock_db'
+    # db_uri = 'postgres://user:password@host/mock_db'
     db_uri = 'sqlite:///:memory:'
     app = create_app(db_uri, use_sql=True)
     app.config['TESTING'] = True
-    # db.init_app(app)
     with app.app_context():
         yield app.data_manager
     

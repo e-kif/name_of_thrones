@@ -76,6 +76,7 @@ def test_json_update_operation(jon_snow):
 
 
 def test_sql_read_operation(sql_db, jon_snow, daenerys, olenna_tyrell):
+    sql_db._reset_database()
     assert len(sql_db.read_characters()) == 20
     assert sql_db.read_characters() != sql_db.read_characters()
     assert sql_db.read_character(1) == jon_snow
@@ -104,6 +105,7 @@ def test_sql_read_characters_filters(sql_db):
 
 
 def test_sql_read_characters_sorting(sql_db, jon_snow, daenerys, olenna_tyrell):
+    sql_db._reset_database()
     assert sql_db.read_characters(sorting='id')[0] == jon_snow
     assert sql_db.read_characters(sorting='id', order='sort_asc')[0] == jon_snow
     assert sql_db.read_characters(sorting='id', order='asc')[0] == jon_snow
@@ -115,6 +117,7 @@ def test_sql_read_characters_sorting(sql_db, jon_snow, daenerys, olenna_tyrell):
 
 
 def test_sql_create_operation(sql_db, robert_baratheon):
+    sql_db._reset_database()
     robert_db = sql_db.add_character(robert_baratheon)
     assert len(sql_db) == 51, 'Character was not added'
     assert getattr(robert_db, 'id'), 'New character does not have "id" key'
@@ -128,9 +131,11 @@ def test_sql_create_operation(sql_db, robert_baratheon):
 
 
 def test_sql_delete_operation(sql_db, jon_snow):
-    assert isinstance(sql_db.remove_character(2), dict), 'Remove method returns wrong data type'
+    sql_db._reset_database()
+    assert isinstance(sql_db.remove_character(2), tuple), 'Remove method returns wrong data type'
+    assert [char['id'] for char in sql_db.read_characters(sorting='id')] == [1] + [i for i in range(3, 51)]
     assert len(sql_db) == 49, 'Remove method did not reduce amount of characters'
-    assert sql_db.remove_character(1) == jon_snow, 'Remove method returned wrong data'
+    assert sql_db.remove_character(1) == (jon_snow, 200), 'Remove method returned wrong data'
     with pytest.raises(KeyError):
         sql_db.remove_character(58)
     with pytest.raises(KeyError):
@@ -140,6 +145,7 @@ def test_sql_delete_operation(sql_db, jon_snow):
 
 
 def test_sql_update_operation(sql_db, jon_snow):
+    sql_db._reset_database()
     assert sql_db.update_character(1, {'name': 'Gendalf'})['name'] == 'Gendalf', 'Function returns not updated field'
     jon_snow.update({'name': 'Gendalf'})
     assert sql_db.read_character(1) == jon_snow, 'Character was not updated in the database'

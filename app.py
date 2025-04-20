@@ -8,13 +8,13 @@ from data.sql_data_manager import SQLDataManager
 from models.characters import db
 
 
-def create_app(db_path: str = os.path.join('storage', 'characters.json'), use_sql: bool = False):
+def create_app(db_path: str = None, use_sql: bool = False):
     """Creates the app, registers all blueprints, return the app"""
     load_dotenv()
     app = Flask(__name__)
 
     if use_sql:
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_path or os.getenv('DATABASE_URI')
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         db.init_app(app)
 
@@ -24,7 +24,7 @@ def create_app(db_path: str = os.path.join('storage', 'characters.json'), use_sq
     
         app.register_blueprint(database_bp, url_prefix='/database')
     else:
-        app.data_manager = JSONDataManager(db_path)
+        app.data_manager = db_path or JSONDataManager(os.path.join('storage', 'characters.json'))
 
     
     app.register_blueprint(characters_bp, url_prefix='/characters')
@@ -49,3 +49,6 @@ if __name__ == '__main__':
     # todo update readme
     # todo deploy
     # todo ci/cd workflow
+
+
+# = os.path.join('storage', 'characters.json')
