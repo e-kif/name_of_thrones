@@ -20,14 +20,14 @@ class SQLDataManager(DataManager):
             del character['id']
             self.add_character(character, refresh=False)
 
-    def read_character(self, character_id: int):
+    def read_character(self, character_id: int, return_object=False):
         """Returns a character with id = caracter_id or an error message
         if character was not found
         """
         try:
             db_character = self.session.query(Characters)\
-                .filter_by(id=character_id).one().dict
-            return db_character
+                .filter_by(id=character_id).one()
+            return db_character if return_object else db_character.dict
         except exc.NoResultFound:
             return {'error': f'Character with id={character_id} was not found.'}, 404
 
@@ -118,9 +118,13 @@ class SQLDataManager(DataManager):
             self.session.rollback()
             return {'message': f'A database error occurred.', 'error': str(error)}, 500
 
-
     def remove_character(self, character_id):
-        pass
+        if not isinstance(character_id, int):
+            raise TypeError
+        rem_character = self.read_character(character_id, return_object=True)
+        if isinstance(rem_character, tuple):
+            raise KeyError(rem_character)
+        return self._delete(rem_character)
 
     def update_character(self, character_id, character):
         pass
@@ -142,13 +146,14 @@ class SQLDataManager(DataManager):
     #     if refresh:
     #         return self.session.refresh(instance), 201
         
-    # def _delete(self, instance):
-    #     """Delete an instance from the database with wrror handling and rollback"""
-    #     try:
-    #         self.session.delete(instance)
-    #         self.session.commit()
-    #     except exc.SQLAlchemyError as error:
-    #         self.session.rollback()
-    #         return {'message': 'A database error occurred.', 'error': str(error)}, 500
-    #     return instance, 200
+    def _delete(self, instance):
+        """Delete an instance from the database with wrror handling and rollback"""
+        instance_dict = instance.dict
+        try:
+            self.session.delete(instance)
+            self.session.commit()
+        except exc.SQLAlchemyError as error:
+            self.session.rollback()
+            return {'message': 'A database error occurred.', 'error': str(error)}, 500
+        return instance_dict, 200
         
