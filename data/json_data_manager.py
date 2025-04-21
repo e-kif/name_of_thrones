@@ -38,45 +38,47 @@ class JSONDataManager(DataManager):
             return self._read_random_n_characters(20), 200
         
         characters = self.characters
-        
-        # Filtering part
         if filter:
-            allowed_filer_keys = self.allowed_fields.union({'age_more_than', 'age_less_then', 'age_less_than'})
-            if any([key for key in filter.keys() if key.lower() not in allowed_filer_keys]):
-                raise ValueError
-            characters = [character for character in characters \
-                        if all([value.lower() in character.get(key).lower() \
-                        if isinstance(character.get(key), str) and isinstance(value, str) \
-                        else value == character.get(key) for key, value in filter.items() \
-                        if key not in {'age_more_than', 'age_less_then'}])]
-            if filter.get('age_more_than'):
-                characters = [character for character in characters if character['age']
-                              and character['age'] >= filter['age_more_than']]
-            if filter.get('age_less_then'):
-                characters = [character for character in characters if character['age']
-                              and character['age']<= filter['age_less_then']]
-        
-        # Sorting part
+            characters = self._filter_characters(characters, filter)
         if sorting:
-            if sorting not in self.allowed_fields.union({'id'}):
-                raise ValueError
-            match order:
-                case 'sort_des' | 'desc':
-                    reverse = True
-                case None | 'asc' | 'sort_asc':
-                    reverse = False
-            if sorting:
-                characters.sort(key=lambda char: (char[sorting] is None, char[sorting]), reverse=reverse)
-
-        # Pagination part
+            characters = self._sort_characters(characters, sorting, order)
         if limit:
-            start, end = limit * skip if skip else 0, limit * (skip + 1) if skip else limit
-            if start >= len(self):
-                raise IndexError
-        else:
-            start, end = 0, 20
-        return characters[start:end], 200
+            characters = self._characters_pagination(characters, limit, skip)
+        return (characters, 200) if characters else ([], 404)
     
+    def _filter_characters(self, characters, filter):
+        allowed_filer_keys = self.allowed_fields.union({'age_more_than', 'age_less_then', 'age_less_than'})
+        if any([key for key in filter.keys() if key.lower() not in allowed_filer_keys]):
+            raise ValueError
+        characters = [character for character in characters \
+                    if all([value.lower() in character.get(key).lower() \
+                    if isinstance(character.get(key), str) and isinstance(value, str) \
+                    else value == character.get(key) for key, value in filter.items() \
+                    if key not in {'age_more_than', 'age_less_then'}])]
+        if filter.get('age_more_than'):
+            characters = [character for character in characters if character['age']
+                            and character['age'] >= filter['age_more_than']]
+        if filter.get('age_less_then'):
+            characters = [character for character in characters if character['age']
+                            and character['age']<= filter['age_less_then']]
+        return characters
+    
+    def _sort_characters(self, characters, sorting, order):
+        if sorting not in self.allowed_fields.union({'id'}):
+            raise ValueError
+        match order:
+            case 'sort_des' | 'desc':
+                reverse = True
+            case None | 'asc' | 'sort_asc':
+                reverse = False
+        return sorted(characters, key=lambda char: (char[sorting] is None, char[sorting]), reverse=reverse)
+
+    def _characters_pagination(self, characters, limit, skip):
+        start, end = limit * skip if skip else 0, limit * (skip + 1) if skip else limit
+        if start >= len(self):
+            raise IndexError
+        return characters[start:end]
+
     def _read_random_n_characters(self, n: int = 20):
         return sorted(sample(self.storage, 20), key=lambda char: char['id'])
         
@@ -99,7 +101,6 @@ class JSONDataManager(DataManager):
         character.update({'id': self.next_character_index})
         [character.update({key: None}) for key in self.opt_fields
          if key not in character.keys()]
-        print(f'{character=}')
         self.storage.append(character)
         self.next_character_index += 1
         return character, 201
@@ -127,7 +128,6 @@ class JSONDataManager(DataManager):
         """
         remove_character = self.read_character(character_id, return_dict=True)
         if remove_character:
-            print(f'{remove_character=}')
             self.storage.remove(remove_character)
         return remove_character, 200
 
