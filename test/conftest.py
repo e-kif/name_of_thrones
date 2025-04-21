@@ -3,7 +3,7 @@ import pytest
 import tempfile
 import json
 from app import create_app
-
+from data.json_data_manager import JSONDataManager as json_data_manager
 
 
 # def test_app(db_uri, use_sql: bool = True):
@@ -34,7 +34,14 @@ def client():
 
 
 @pytest.fixture(scope='function')
+def json_db():
+    """JSON database manager with in-memory storage"""
+    return json_data_manager()
+
+
+@pytest.fixture(scope='function')
 def sql_db():
+    """In-memory sql database instance for testing CRUD operations"""
     # db_uri = 'postgres://user:password@host/mock_db'
     db_uri = 'sqlite:///:memory:'
     app = create_app(db_uri, use_sql=True)
@@ -42,6 +49,16 @@ def sql_db():
     with app.app_context():
         yield app.data_manager
     
+
+@pytest.fixture(scope='function')
+def sql_client():
+    """Client for testing endpoints using in-memory sql database"""
+    db_uri = 'sqlite:///:memory:'
+    app = create_app(db_uri, use_sql=True)
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
+
 
 @pytest.fixture()
 def jon_snow():

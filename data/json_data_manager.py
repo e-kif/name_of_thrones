@@ -33,9 +33,9 @@ class JSONDataManager(DataManager):
                         order: str = None) -> list:
         """Returns current state of the instance storage"""
         if not self.storage:
-            return []
+            return [], 404
         if not any([limit, skip, order, sorting, filter]) and len(self) >= 20:
-            return self._read_random_n_characters(20)
+            return self._read_random_n_characters(20), 200
         
         characters = self.characters
         
@@ -75,7 +75,7 @@ class JSONDataManager(DataManager):
                 raise IndexError
         else:
             start, end = 0, 20
-        return characters[start:end]
+        return characters[start:end], 200
     
     def _read_random_n_characters(self, n: int = 20):
         return sorted(sample(self.storage, 20), key=lambda char: char['id'])
@@ -102,9 +102,9 @@ class JSONDataManager(DataManager):
         print(f'{character=}')
         self.storage.append(character)
         self.next_character_index += 1
-        return character
+        return character, 201
 
-    def read_character(self, character_id) -> dict:
+    def read_character(self, character_id, return_dict=False) -> dict:
         """Retrieves a character with id=character_id
         from the instance storage using binary search algorithm"""
         left, right = 0, len(self.storage)
@@ -113,7 +113,7 @@ class JSONDataManager(DataManager):
             if mid >= len(self.storage):
                 break
             if self.storage[mid]['id'] == character_id:
-                return self.storage[mid]
+                return self.storage[mid] if return_dict else (self.storage[mid], 200)
             elif self.storage[mid]['id'] < character_id:
                 left = mid + 1
             else:
@@ -125,10 +125,11 @@ class JSONDataManager(DataManager):
         """Deletes a character with id=character_id
         from the instance storage
         """
-        remove_character = self.read_character(character_id)
+        remove_character = self.read_character(character_id, return_dict=True)
         if remove_character:
+            print(f'{remove_character=}')
             self.storage.remove(remove_character)
-        return remove_character
+        return remove_character, 200
 
     def update_character(self, character_id, character):
         """Updates character info for the character with id=character_id"""
@@ -140,9 +141,9 @@ class JSONDataManager(DataManager):
                                  f'{", ".join(not_allowed_keys)}.')
         if 'name' in character.keys() and self._character_exists(character['name']):
             raise AttributeError(f'Character {character["id"]} already exists.')
-        db_character = self.read_character(character_id)
+        db_character = self.read_character(character_id, return_dict=True)
         db_character.update(character)
-        return db_character
+        return db_character, 200
 
     @property
     def characters(self) -> list:
