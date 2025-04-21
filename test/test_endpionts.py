@@ -52,8 +52,8 @@ def test_read_character_json(client, jon_snow, daenerys, olenna_tyrell):
     assert response4.status_code == 404, 'Endpoint returns wrong response code'
 
 
-def test_create_character_json(client, daenerys, robert_baratheon, aemon):
-    robert = client.post('/characters', json=robert_baratheon, follow_redirects=True)
+def test_create_character_json(client, daenerys, robert_baratheon, aemon, headers_json):
+    robert = client.post('/characters', json=robert_baratheon, headers=headers_json, follow_redirects=True)
     assert robert.status_code == 201, 'Wrong status code for character creation'
     assert robert.json.get('id', None), 'ID was not add during character creation'
     assert robert.json['id'] > 50, 'ID was not incremented during character creation'
@@ -63,10 +63,10 @@ def test_create_character_json(client, daenerys, robert_baratheon, aemon):
 
     aemon_id, aemon_nameless, aemon_roleless, aemon_strengthless = [aemon.copy() for _ in range(4)]
     aemon_id['id'], aemon_nameless['name'], aemon_roleless['role'], aemon_strengthless['strength'] = 52, None, None, None
-    create_aemon_id = client.post('/characters', json=aemon_id, follow_redirects=True)
-    create_aemon_nameless = client.post('/characters', json=aemon_nameless, follow_redirects=True)
-    create_aemon_roleless = client.post('/characters', json=aemon_roleless, follow_redirects=True)
-    create_aemon_strengthless = client.post('/characters', json=aemon_strengthless, follow_redirects=True)
+    create_aemon_id = client.post('/characters', json=aemon_id, headers=headers_json, follow_redirects=True)
+    create_aemon_nameless = client.post('/characters', json=aemon_nameless, headers=headers_json, follow_redirects=True)
+    create_aemon_roleless = client.post('/characters', json=aemon_roleless, headers=headers_json, follow_redirects=True)
+    create_aemon_strengthless = client.post('/characters', json=aemon_strengthless, headers=headers_json, follow_redirects=True)
     assert create_aemon_id.status_code == 400, 'Creating a character with provided id did not return bad request status code'
     assert create_aemon_id.json == {'error': 'Character id should not be provided.'}, 'Wrong error message on provided character id'
     assert create_aemon_nameless.status_code == 400, 'Character creation with name=None returns wrong status code'
@@ -77,9 +77,9 @@ def test_create_character_json(client, daenerys, robert_baratheon, aemon):
     assert create_aemon_strengthless.json == {'error': 'Character\'s strength can not be None.'}, 'Wrong error message on strength=None'
 
     aemon_nameless['name'], aemon_roleless['role'], aemon_strengthless['strength'] = '', '', ''
-    create_aemon_nameless = client.post('/characters', json=aemon_nameless, follow_redirects=True)
-    create_aemon_roleless = client.post('/characters', json=aemon_roleless, follow_redirects=True)
-    create_aemon_strengthless = client.post('/characters', json=aemon_strengthless, follow_redirects=True)
+    create_aemon_nameless = client.post('/characters', json=aemon_nameless, headers=headers_json, follow_redirects=True)
+    create_aemon_roleless = client.post('/characters', json=aemon_roleless, headers=headers_json, follow_redirects=True)
+    create_aemon_strengthless = client.post('/characters', json=aemon_strengthless, headers=headers_json, follow_redirects=True)
     assert create_aemon_nameless.status_code == 400, 'Character creation with empty name field returns wrong status code'
     assert create_aemon_nameless.json == {'error': 'Character\'s name can not be empty.'}, 'Wrong error message on empty name'
     assert create_aemon_roleless.status_code == 400, 'Character creation with empty role field returns wrong status code'
@@ -88,9 +88,9 @@ def test_create_character_json(client, daenerys, robert_baratheon, aemon):
     assert create_aemon_strengthless.json == {'error': 'Character\'s strength can not be empty.'}, 'Wrong error message on empty strength'
 
     aemon_nameless.pop('name'); aemon_roleless.pop('role'); aemon_strengthless.pop('strength')
-    create_aemon_nameless = client.post('/characters', json=aemon_nameless, follow_redirects=True)
-    create_aemon_roleless = client.post('/characters', json=aemon_roleless, follow_redirects=True)
-    create_aemon_strengthless = client.post('/characters', json=aemon_strengthless, follow_redirects=True)
+    create_aemon_nameless = client.post('/characters', json=aemon_nameless, headers=headers_json, follow_redirects=True)
+    create_aemon_roleless = client.post('/characters', json=aemon_roleless, headers=headers_json, follow_redirects=True)
+    create_aemon_strengthless = client.post('/characters', json=aemon_strengthless, headers=headers_json, follow_redirects=True)
     assert create_aemon_nameless.status_code == 400, 'Missing name field returns wrong status'
     assert create_aemon_nameless.json == {'error': 'Missing required field(s): name.'}, 'Wrong error message on missing name field'
     assert create_aemon_roleless.status_code == 400, 'Missing role filed returns wrong status code'
@@ -99,13 +99,13 @@ def test_create_character_json(client, daenerys, robert_baratheon, aemon):
     assert create_aemon_strengthless.json == {'error': 'Missing required field(s): strength.'}, 'Wrong error message on missing strength field'
 
     daenerys.pop('id')
-    create_dany = client.post('/characters', json=daenerys, follow_redirects=True)
+    create_dany = client.post('/characters', json=daenerys, headers=headers_json, follow_redirects=True)
     assert create_dany.status_code == 400, 'Wrong status code on creating existing character'
     assert create_dany.json == {'error': f'Character {daenerys["name"]} already exists.'}, 'Wrong error message on creating existing character'
 
 
-def test_delete_character_json(client, jon_snow, daenerys, olenna_tyrell):
-    jon = client.delete('/characters/1')
+def test_delete_character_json(client, jon_snow, daenerys, olenna_tyrell, headers_json):
+    jon = client.delete('/characters/1', headers=headers_json)
     assert jon.status_code == 200
     assert jon.json == jon_snow
     first_character = client.get('characters/1')
@@ -113,22 +113,22 @@ def test_delete_character_json(client, jon_snow, daenerys, olenna_tyrell):
     assert first_character.status_code == 404, 'Character is not found after deletion'
     assert first_character.json == {"error": "Character with id=1 was not found."}, 'Incorrect message for trying to read deleted character'
     for i in range(2, 51):
-        client.delete(f'/characters/{i}')
+        client.delete(f'/characters/{i}', headers=headers_json)
     empty_response = client.get('/characters', follow_redirects=True)
     assert empty_response.status_code == 404, 'Wrong status code for empty database'
     assert isinstance(empty_response.json, list), 'Empty database return wrong type'
     assert empty_response.json == [], 'Empty database return wrong data'
-    assert client.delete('/characters/1').status_code == 404
+    assert client.delete('/characters/1', headers=headers_json).status_code == 404
 
 
-def test_update_character_json(client, jon_snow, daenerys, olenna_tyrell):
-    jon_gendalf = client.put('/characters/1', json={'name': 'Gendalf'})
+def test_update_character_json(client, jon_snow, daenerys, olenna_tyrell, headers_json):
+    jon_gendalf = client.put('/characters/1', json={'name': 'Gendalf'}, headers=headers_json)
     assert jon_gendalf.json['name'] == 'Gendalf', 'Field was not updated'
     assert jon_gendalf.status_code == 200, 'Wrong response status code'
-    wrong_character = client.put('/characters/52', json={'age': 120})
+    wrong_character = client.put('/characters/52', json={'age': 120}, headers=headers_json)
     assert wrong_character.status_code == 400, 'Update for non existing character wrong status code'
     assert wrong_character.json == {'error': 'Character with id=52 was not found.'}, 'Wrong message for 404 error'
-    id_update = client.put('/characters/23', json={'id': 12, 'name': 'Helly R'})
+    id_update = client.put('/characters/23', json={'id': 12, 'name': 'Helly R'}, headers=headers_json)
     assert id_update.status_code == 400, 'ID update is prohibited'
     assert id_update.json == {'error': 'Updating ID field is not allowed.'}, 'Wrong message for id update error'
 
@@ -190,9 +190,9 @@ def test_read_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
     assert response4.status_code == 404, 'Endpoint returns wrong response code'
 
 
-def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon):
+def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon, headers_sql):
     sql_client.get('/database/reset')
-    robert = sql_client.post('/characters', json=robert_baratheon, follow_redirects=True)
+    robert = sql_client.post('/characters', json=robert_baratheon, headers=headers_sql, follow_redirects=True)
     assert robert.status_code == 201, 'Wrong status code for character creation'
     assert robert.json.get('id', None), 'ID was not add during character creation'
     assert robert.json['id'] > 50, 'ID was not incremented during character creation'
@@ -202,10 +202,10 @@ def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon):
 
     aemon_id, aemon_nameless, aemon_roleless, aemon_strengthless = [aemon.copy() for _ in range(4)]
     aemon_id['id'], aemon_nameless['name'], aemon_roleless['role'], aemon_strengthless['strength'] = 52, None, None, None
-    create_aemon_id = sql_client.post('/characters', json=aemon_id, follow_redirects=True)
-    create_aemon_nameless = sql_client.post('/characters', json=aemon_nameless, follow_redirects=True)
-    create_aemon_roleless = sql_client.post('/characters', json=aemon_roleless, follow_redirects=True)
-    create_aemon_strengthless = sql_client.post('/characters', json=aemon_strengthless, follow_redirects=True)
+    create_aemon_id = sql_client.post('/characters', json=aemon_id, headers=headers_sql, follow_redirects=True)
+    create_aemon_nameless = sql_client.post('/characters', json=aemon_nameless, headers=headers_sql, follow_redirects=True)
+    create_aemon_roleless = sql_client.post('/characters', json=aemon_roleless, headers=headers_sql, follow_redirects=True)
+    create_aemon_strengthless = sql_client.post('/characters', json=aemon_strengthless, headers=headers_sql, follow_redirects=True)
     assert create_aemon_id.status_code == 400, 'Creating a character with provided id did not return bad request status code'
     assert create_aemon_id.json == {'error': 'Character id should not be provided.'}, 'Wrong error message on provided character id'
     assert create_aemon_nameless.status_code == 400, 'Character creation with name=None returns wrong status code'
@@ -216,9 +216,9 @@ def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon):
     assert create_aemon_strengthless.json == {'error': 'Character\'s strength can not be None.'}, 'Wrong error message on strength=None'
 
     aemon_nameless['name'], aemon_roleless['role'], aemon_strengthless['strength'] = '', '', ''
-    create_aemon_nameless = sql_client.post('/characters', json=aemon_nameless, follow_redirects=True)
-    create_aemon_roleless = sql_client.post('/characters', json=aemon_roleless, follow_redirects=True)
-    create_aemon_strengthless = sql_client.post('/characters', json=aemon_strengthless, follow_redirects=True)
+    create_aemon_nameless = sql_client.post('/characters', json=aemon_nameless, headers=headers_sql, follow_redirects=True)
+    create_aemon_roleless = sql_client.post('/characters', json=aemon_roleless, headers=headers_sql, follow_redirects=True)
+    create_aemon_strengthless = sql_client.post('/characters', json=aemon_strengthless, headers=headers_sql, follow_redirects=True)
     assert create_aemon_nameless.status_code == 400, 'Character creation with empty name field returns wrong status code'
     assert create_aemon_nameless.json == {'error': 'Character\'s name can not be empty.'}, 'Wrong error message on empty name'
     assert create_aemon_roleless.status_code == 400, 'Character creation with empty role field returns wrong status code'
@@ -227,9 +227,9 @@ def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon):
     assert create_aemon_strengthless.json == {'error': 'Character\'s strength can not be empty.'}, 'Wrong error message on empty strength'
 
     aemon_nameless.pop('name'); aemon_roleless.pop('role'); aemon_strengthless.pop('strength')
-    create_aemon_nameless = sql_client.post('/characters', json=aemon_nameless, follow_redirects=True)
-    create_aemon_roleless = sql_client.post('/characters', json=aemon_roleless, follow_redirects=True)
-    create_aemon_strengthless = sql_client.post('/characters', json=aemon_strengthless, follow_redirects=True)
+    create_aemon_nameless = sql_client.post('/characters', json=aemon_nameless, headers=headers_sql, follow_redirects=True)
+    create_aemon_roleless = sql_client.post('/characters', json=aemon_roleless, headers=headers_sql, follow_redirects=True)
+    create_aemon_strengthless = sql_client.post('/characters', json=aemon_strengthless, headers=headers_sql, follow_redirects=True)
     assert create_aemon_nameless.status_code == 400, 'Missing name field returns wrong status'
     assert create_aemon_nameless.json == {'error': 'Missing required field(s): name.'}, 'Wrong error message on missing name field'
     assert create_aemon_roleless.status_code == 400, 'Missing role filed returns wrong status code'
@@ -238,37 +238,37 @@ def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon):
     assert create_aemon_strengthless.json == {'error': 'Missing required field(s): strength.'}, 'Wrong error message on missing strength field'
 
     daenerys.pop('id')
-    create_dany = sql_client.post('/characters', json=daenerys, follow_redirects=True)
+    create_dany = sql_client.post('/characters', json=daenerys, headers=headers_sql, follow_redirects=True)
     assert create_dany.status_code == 409, 'Wrong status code on creating existing character'
     assert create_dany.json == {'error': f'Character {daenerys["name"]} already exists.'}, 'Wrong error message on creating existing character'
 
 
-def test_delete_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
+def test_delete_character_sql(sql_client, jon_snow, headers_sql):
     sql_client.get('/database/reset')
-    jon = sql_client.delete('/characters/1')
+    jon = sql_client.delete('/characters/1', headers=headers_sql)
     assert jon.status_code == 200
     assert jon.json == jon_snow
-    first_character = sql_client.get('characters/1')
+    first_character = sql_client.get('characters/1', headers=headers_sql)
     assert first_character.status_code != 200, 'Character was not deleted'
     assert first_character.status_code == 404, 'Character is not found after deletion'
     assert first_character.json == {"error": "Character with id=1 was not found."}, 'Incorrect message for trying to read deleted character'
     for i in range(2, 51):
-        sql_client.delete(f'/characters/{i}')
-    empty_response = sql_client.get('/characters', follow_redirects=True)
+        sql_client.delete(f'/characters/{i}', headers=headers_sql)
+    empty_response = sql_client.get('/characters', headers=headers_sql, follow_redirects=True)
     assert empty_response.status_code == 404, 'Wrong status code for empty database'
     assert isinstance(empty_response.json, list), 'Empty database return wrong type'
     assert empty_response.json == [], 'Empty database return wrong data'
-    assert sql_client.delete('/characters/1').status_code == 404
+    assert sql_client.delete('/characters/1', headers=headers_sql).status_code == 404
 
 
-def test_update_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
+def test_update_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell, headers_sql):
     sql_client.get('/database/reset')
-    jon_gendalf = sql_client.put('/characters/1', json={'name': 'Gendalf'})
+    jon_gendalf = sql_client.put('/characters/1', json={'name': 'Gendalf'}, headers=headers_sql)
     assert jon_gendalf.json['name'] == 'Gendalf', 'Field was not updated'
     assert jon_gendalf.status_code == 200, 'Wrong response status code'
-    wrong_character = sql_client.put('/characters/52', json={'age': 120})
+    wrong_character = sql_client.put('/characters/52', json={'age': 120}, headers=headers_sql)
     assert wrong_character.status_code == 400, 'Update for non existing character wrong status code'
     assert wrong_character.json == {'error': 'Character with id=52 was not found.'}, 'Wrong message for 400 error'
-    id_update = sql_client.put('/characters/23', json={'id': 12, 'name': 'Helly R'})
+    id_update = sql_client.put('/characters/23', json={'id': 12, 'name': 'Helly R'}, headers=headers_sql)
     assert id_update.status_code == 400, 'ID update is prohibited'
     assert id_update.json == {'error': 'Updating ID field is not allowed.'}, 'Wrong message for id update error'

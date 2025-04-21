@@ -119,3 +119,15 @@ def aemon():
             'age': 102,
             'role': 'Maester of the Night\'s Watch',
             'strength': 'Wisdom and loyalty'}
+
+
+@pytest.fixture()
+def headers_json(client):
+    token = client.post('/login', json={'username': 'michael', 'password': 'Scott'}).json['token']
+    return {'Authorization': f'Bearer {token}'}
+
+
+@pytest.fixture()
+def headers_sql(sql_client):
+    token = sql_client.post('/login', json={'username': 'michael', 'password': 'Scott'}).json['token']
+    return {'Authorization': f'Bearer {token}'}
