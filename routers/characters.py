@@ -37,9 +37,9 @@ def get_characters():
                                           sorting=sorting, order=order)
     except IndexError:
         return jsonify({'error': 'There are no results for given limit and skip parameters.'}), 404
-    except AttributeError as error:
-        return jsonify({'error': str(error)}), 409
-    if characters:
+    # except AttributeError as error:
+    #     return jsonify({'error': str(error)}), 409
+    if characters[0]:
         return jsonify(characters[0]), characters[1]
     else:
         return jsonify([]), 404
@@ -62,6 +62,8 @@ def add_character() -> CharacterOut:
         return jsonify(db_character[0]), db_character[1]
     except ValueError as error:
         return jsonify({'error': error.args[0]}), 400
+    except AttributeError as error:
+        return jsonify({'error': error.args[0]}), 409
 
 
 @characters_bp.route('/<int:character_id>', methods=['DELETE'])
@@ -80,6 +82,6 @@ def update_character(character_id: int) -> CharacterOut:
         db_character = db().update_character(character_id, updated_character)
         return db_character[0], db_character[1]
     except KeyError as error:
-        return jsonify({'error': error.args[0]}), 404
+        return jsonify({'error': error.args[0]}), 400
     except AttributeError as error:
         return jsonify({'error': error.args[0]}), 400

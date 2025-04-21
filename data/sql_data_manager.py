@@ -35,19 +35,20 @@ class SQLDataManager(DataManager):
                         filter: dict = None, sorting: str = None, order: str = None):
         if all([limit is None, sorting is None, not filter, order is None]):
             return self._read_random_n_characters(20), 200
+
         query = self.session.query(Characters)
-        
         if filter:
             query = self._apply_filter(query, filter)
-
         if sorting:
             query = self._apply_sorting(query, sorting, order)
-        characters = query.order_by(Characters.id).limit(limit).offset(skip).all()
-        return [character.dict for character in characters], 200 if characters else [], 404
+        if limit:
+            query = self._apply_pagination(query, limit, skip)
+        characters = query.all()
+        return ([character.dict for character in characters], 200) if characters else ([], 404)
     
     @staticmethod
     def _apply_filter(query, filter, model=Characters):
-        allowed_filter_fields = Characters.allowed_fields.union({'age_less_than', 'age_less_then', 'age_more_than'})
+        allowed_filter_fields = model.allowed_fields.union({'age_less_than', 'age_less_then', 'age_more_than'})
         for key, value in filter.items():
             key = key.lower()
             if key not in allowed_filter_fields:
@@ -72,12 +73,20 @@ class SQLDataManager(DataManager):
     
     @staticmethod
     def _apply_sorting(query, sorting, order, model = Characters):
-        sort_properties = Characters.allowed_fields.union({'id'})
+        sort_properties = model.allowed_fields.union({'id'})
         if sorting not in sort_properties:
             raise ValueError(f'Wrong sorting parameter provided: {sorting}.')
         if order in {'desc', 'sort_des'}:
             return query.order_by(desc(getattr(Characters, sorting)))
         return query.order_by(getattr(Characters, sorting))
+    
+    @staticmethod
+    def _apply_pagination(query, limit, skip, model=Characters):
+        if limit and skip:
+            skip = limit * skip
+            if skip > query.order_by(None).with_entities(func.count(model.id)).scalar():
+                raise IndexError
+        return query.limit(limit).offset(skip)
 
     def _read_random_n_characters(self, n: int):
         """Returns random n characters ordered by id. If n >= character count in database -
@@ -89,13 +98,19 @@ class SQLDataManager(DataManager):
 
     def add_character(self, character: dict, refresh: bool = True):
         if 'id' in character.keys():
-            raise ValueError('New character id should not be provided.')
+            raise ValueError('Character id should not be provided.')
         missing_req_fields = Characters.req_fields.difference(set(character.keys()))
         if missing_req_fields:
-            raise ValueError(f'Missing required character field(s): {", ".join(missing_req_fields)}.')
-        empty_req_fields = [key for key in Characters.req_fields if character[key].strip() == '']        
+            raise ValueError(f'Missing required field(s): {", ".join(missing_req_fields)}.')
+        req_fields_none = [key for key in Characters.req_fields if character[key] is None]
+        if req_fields_none:
+            raise ValueError(f'Character\'s {req_fields_none[0]} can not be None.')
+        empty_req_fields = [key for key in Characters.req_fields if character[key].strip() == '']
         if empty_req_fields:
-            raise ValueError(f'Empty required character field(s): {", ".join(empty_req_fields)}.')
+            raise ValueError(f'Character\'s {empty_req_fields[0]} can not be empty.')
+        if self._character_exists(character['name']):
+            raise AttributeError(f'Character {character["name"]} already exists.')
+
         character_req = {key: value for key, value in character.items()\
                          if value is not None and key in Characters.req_fields}
         character_opt = {key: value for key, value in character.items()\
@@ -109,7 +124,7 @@ class SQLDataManager(DataManager):
             self.session.commit()
             if refresh:
                 self.session.refresh(add_character)
-            return add_character, 201 if refresh else character, 201
+            return (add_character.dict, 201) if refresh else (character, 201)
         except exc.IntegrityError as error:
             self.session.rollback()
             return {'message': 'Integrity error occurred.', 'error': str(error)}, 409
@@ -134,6 +149,8 @@ class SQLDataManager(DataManager):
         if self._character_exists(character.get('name')):
             raise AttributeError(f'Character {character["name"]} already exists.')
         upd_character = self.read_character(character_id, return_object=True)
+        if not isinstance(upd_character, Characters):
+            return upd_character[0], 400
         [setattr(upd_character, key, value) for key, value in character.items()]
         try:
             self.session.commit()

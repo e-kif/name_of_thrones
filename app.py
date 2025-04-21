@@ -24,8 +24,7 @@ def create_app(db_path: str = None, use_sql: bool = False):
     
         app.register_blueprint(database_bp, url_prefix='/database')
     else:
-        app.data_manager = db_path or JSONDataManager(os.path.join('storage', 'characters.json'))
-
+        app.data_manager = JSONDataManager(db_path) if db_path else JSONDataManager(os.path.join('storage', 'characters.json'))
     
     app.register_blueprint(characters_bp, url_prefix='/characters')
     
@@ -40,8 +39,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-    # refactor fields checks for sql/json
-    # refactor endpoint return type (json -> tuple)
     # endpoints error handling (404, 500)
     # todo swagger docs
     # todo pydantic schemas

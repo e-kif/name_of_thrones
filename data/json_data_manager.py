@@ -134,7 +134,7 @@ class JSONDataManager(DataManager):
     def update_character(self, character_id, character):
         """Updates character info for the character with id=character_id"""
         if character.get('id'):
-            raise AttributeError('Character id is not allowed to be changed.')
+            raise AttributeError('Updating ID field is not allowed.')
         not_allowed_keys = set(character.keys()).difference(self.allowed_fields)
         if not_allowed_keys:
             raise AttributeError('Not allowed key(s): '
