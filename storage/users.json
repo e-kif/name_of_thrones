@@ -7,19 +7,19 @@
     },
     {
         "id": 2,
-        "name": "Jim",
+        "username": "Jim",
         "password": "Halpert",
         "role": "Salesman"
     },
     {
         "id": 3,
-        "name": "Pam",
+        "username": "Pam",
         "password": "Beesly",
         "role": "Receptionist"
     },
     {
         "id": 4,
-        "name": "Dwight",
+        "username": "Dwight",
         "password": "Schrute",
         "role": "Assistant to the Regional Manager"
     }
