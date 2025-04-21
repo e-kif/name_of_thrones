@@ -1,8 +1,7 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
-from routers.characters import characters_bp
-from routers.database_management import database_bp
+from routers import database_bp, characters_bp, errorhandlers_bp
 from data.json_data_manager import JSONDataManager
 from data.sql_data_manager import SQLDataManager
 from models.characters import db
@@ -24,11 +23,13 @@ def create_app(db_path: str = None, use_sql: bool = False):
     
         app.register_blueprint(database_bp, url_prefix='/database')
     else:
-        app.data_manager = JSONDataManager(db_path) if db_path else JSONDataManager(os.path.join('storage', 'characters.json'))
+        app.data_manager = JSONDataManager(db_path) if db_path\
+            else JSONDataManager(os.path.join('storage', 'characters.json'))
     
     app.register_blueprint(characters_bp, url_prefix='/characters')
-    
+    app.register_blueprint(errorhandlers_bp)
     return app
+
 
 def main():
     """Main function that starts the app"""
@@ -39,7 +40,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-    # endpoints error handling (404, 500)
     # todo swagger docs
     # todo pydantic schemas
     # todo user list + database counterpart

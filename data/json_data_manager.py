@@ -140,7 +140,7 @@ class JSONDataManager(DataManager):
             raise AttributeError('Not allowed key(s): '
                                  f'{", ".join(not_allowed_keys)}.')
         if 'name' in character.keys() and self._character_exists(character['name']):
-            raise AttributeError(f'Character {character["id"]} already exists.')
+            raise AttributeError(f'Character {character["name"]} already exists.')
         db_character = self.read_character(character_id, return_dict=True)
         db_character.update(character)
         return db_character, 200

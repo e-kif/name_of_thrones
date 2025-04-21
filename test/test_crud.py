@@ -62,7 +62,7 @@ def test_json_delete_operation(json_db, jon_snow):
         json_db.remove_character('1')
 
 
-def test_json_update_operation(json_db, jon_snow):
+def test_json_update_operation(json_db, jon_snow, olenna_tyrell):
     assert json_db.update_character(1, {'name': 'Gendalf'})[0]['name'] == 'Gendalf', 'Function returns not updated field'
     jon_snow.update({'name': 'Gendalf'})
     assert json_db.read_character(1)[0] == jon_snow, 'Character was not updated in the database'
@@ -70,6 +70,8 @@ def test_json_update_operation(json_db, jon_snow):
         json_db.update_character(2, {'id': 22}), 'ID update did not raise an error'
     with pytest.raises(AttributeError):
         json_db.update_character(5, {'hair': None}), 'Update with not allowed field'
+    with pytest.raises(AttributeError):
+        json_db.update_character(11, {'name': olenna_tyrell['name']}), 'Update character name to already existing character name'
 
 
 def test_sql_read_operation(sql_db, jon_snow, daenerys, olenna_tyrell):
@@ -95,6 +97,7 @@ def test_sql_read_characters_filters(sql_db):
     assert all([character['house'] == 'Stark' for character in sql_db.read_characters(filter={'house': 'stARk'})[0]]), 'Filter by house = stARk'
     assert all([character['house'] == 'Stark' for character in sql_db.read_characters(filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = stARk'
     assert all([character['house'] == 'Stark' for character in sql_db.read_characters(filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = tARk'
+    assert all([character['symbol'] == None for character in sql_db.read_characters(filter={'sYmbOl': '   '})[0]]), 'Filter by Symbol = None'
     with pytest.raises(ValueError):
         sql_db.read_characters(filter={'planet': 'earth'})
     assert len(sql_db.read_characters(filter={'age_more_than': 50})[0]) == 8
@@ -140,7 +143,7 @@ def test_sql_delete_operation(sql_db, jon_snow):
         sql_db.remove_character('1')
 
 
-def test_sql_update_operation(sql_db, jon_snow):
+def test_sql_update_operation(sql_db, jon_snow, olenna_tyrell):
     sql_db._reset_database()
     print([char['name'] for char in sql_db.read_characters(limit=50)[0]])
     assert sql_db.update_character(1, {'name': 'Gendalf'})[0]['name'] == 'Gendalf', 'Function returns not updated field'
@@ -151,3 +154,5 @@ def test_sql_update_operation(sql_db, jon_snow):
         sql_db.update_character(2, {'id': 22}), 'ID update did not raise an error'
     with pytest.raises(AttributeError):
         sql_db.update_character(5, {'hair': None}), 'Update with not allowed field'
+    with pytest.raises(AttributeError):
+        sql_db.update_character(22, {'name': olenna_tyrell['name']}), 'Update with not allowed field'
