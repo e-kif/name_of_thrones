@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app
 from schemas.characters import CharacterOut
+from utils.security import token_required
 
 characters_bp = Blueprint('character', __name__)
 
@@ -55,6 +56,7 @@ def get_character(character_id: int) -> CharacterOut:
 
 
 @characters_bp.route('/', methods=['POST'])
+@token_required
 def add_character() -> CharacterOut:
     new_character = request.get_json()
     try:
@@ -67,6 +69,7 @@ def add_character() -> CharacterOut:
 
 
 @characters_bp.route('/<int:character_id>', methods=['DELETE'])
+@token_required
 def remove_character(character_id: int) -> CharacterOut:
     try:
         removed_character = db().remove_character(character_id)
@@ -76,6 +79,7 @@ def remove_character(character_id: int) -> CharacterOut:
 
 
 @characters_bp.route('/<int:character_id>', methods=['PUT'])
+@token_required
 def update_character(character_id: int) -> CharacterOut:
     updated_character = request.get_json()
     try:
