@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "username": "Michael",
+        "password": "Scott",
+        "role": "Regional Manager"
+    },
+    {
+        "id": 2,
+        "name": "Jim",
+        "password": "Halpert",
+        "role": "Salesman"
+    },
+    {
+        "id": 3,
+        "name": "Pam",
+        "password": "Beesly",
+        "role": "Receptionist"
+    },
+    {
+        "id": 4,
+        "name": "Dwight",
+        "password": "Schrute",
+        "role": "Assistant to the Regional Manager"
+    }
+]
