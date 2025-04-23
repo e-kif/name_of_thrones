@@ -45,7 +45,6 @@ if __name__ == '__main__':
     # todo swagger docs
     # todo pydantic schemas
     # todo user list + database counterpart
-    # todo jwt auth
     # todo test coverage
     # todo update requirements
     # todo update readme
