@@ -206,6 +206,10 @@ class SQLDataManager(DataManager):
     def read_user(self, user_id):
         return self._get_user_by_id(user_id)
 
+    def read_users(self):
+        users = self.session.query(Users).all()
+        return [user.dict for user in users], 200 if users else 404
+
     def update_user(self, user_id, user):
         pass
 

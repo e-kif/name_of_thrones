@@ -44,3 +44,14 @@ def delete_user(user_id: int):
     delete_user = current_app.data_manager.delete_user(user_id)
     return jsonify(delete_user[0]), delete_user[1]
 
+
+@users_bp.route('/<int:user_id>', methods=['GET'])
+def read_user(user_id: int):
+    db_user = current_app.data_manager.read_user(user_id)
+    return jsonify(db_user[0]), db_user[1]
+
+@users_bp.route('/', methods=['GET'])
+def read_users():
+    db_users = current_app.data_manager.read_users()
+    return jsonify(db_users[0]), db_users[1]
+
