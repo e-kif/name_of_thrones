@@ -2,6 +2,7 @@ from sqlalchemy import exc, desc
 from sqlalchemy.sql import func
 from data.data_manager import DataManager
 from models.characters import *
+from models.users import Users, Roles
 from data.json_data_manager import JSONDataManager
 
 
@@ -180,3 +181,46 @@ class SQLDataManager(DataManager):
             return True
         except exc.NoResultFound:
             return False
+
+    def add_user(self, user: dict):
+        missing_fields = Users.req_fields.difference(set(user.keys()))
+        if missing_fields:
+            return {'error': f'Missing required field(s): {", ".join(missing_fields)}.'}, 400
+        wrong_fields = set(user.keys()).difference(Users.allowed_fields)
+        if wrong_fields:
+            return {'error': f'Not allowed field(s): {", ".join(wrong_fields)}.'}, 400
+        role = user.get('role')
+        add_user = Users(username=user['username'],
+                         password=user['password'])
+        try:
+            self.session.add(add_user)
+            self.session.flush()
+            if role and role.strip():
+                add_user.role = role.strip()
+            self.session.commit()
+            self.session.refresh(add_user)
+            return add_user.dict, 201
+        except exc.IntegrityError:
+            self.session.rollback()
+            return {'error': f'User {user["username"]} already exists.'}, 409
+
+    def read_user(self, user_id):
+        return self._get_user_by_id(user_id)
+
+    def update_user(self, user_id, user):
+        pass
+
+    def delete_user(self, user_id):
+        delete_user = self._get_user_by_id(user_id, return_object=True)
+        if isinstance(delete_user, tuple):
+            return delete_user
+        self.session.delete(delete_user)
+        self.session.commit()
+        return delete_user.dict, 200
+
+    def _get_user_by_id(self, user_id, return_object=False):
+        try:
+            db_user = self.session.query(Users).filter_by(id=user_id).one()
+            return db_user if return_object else (db_user.dict, 200)
+        except exc.NoResultFound:
+            return {'error': f'User with id={user_id} was not found.'}, 404

@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
-from routers import database_bp, characters_bp, errorhandlers_bp, authentication_bp
+from routers import database_bp, characters_bp, errorhandlers_bp, authentication_bp, users_bp
 from data.json_data_manager import JSONDataManager
 from data.sql_data_manager import SQLDataManager
 from utils.settings import db
@@ -30,6 +30,7 @@ def create_app(db_path: str = None, use_sql: bool = False):
     app.register_blueprint(characters_bp, url_prefix='/characters')
     app.register_blueprint(errorhandlers_bp)
     app.register_blueprint(authentication_bp)
+    app.register_blueprint(users_bp, url_prefix='/users')
     return app
 
 
