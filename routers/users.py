@@ -11,12 +11,9 @@ def login():
     data = request.get_json()
     if any([not data, 'username' not in data, 'password' not in data]):
         return jsonify({'error': 'Missing username or password'}), 400
-    
     username, password = data['username'], data['password']
-    
     if not is_user_credentials_valid(username, password):
         return jsonify({'error': 'Invalid username or password'}), 401
-    
     return generate_access_token(username), 200
    
 
@@ -65,6 +62,8 @@ def update_user(user_id: int):
     wrong_fields = set(data.keys()).difference({'username', 'password', 'role'})
     if wrong_fields:
         return jsonify({'error': f'Not allowed field(s): {", ".join(wrong_fields)}.'}), 400
+    if 'password' in data.keys():
+        data['password'] = hash_password(data['password'])
     updated_user = current_app.data_manager.update_user(user_id, data)
     return jsonify(updated_user[0]), updated_user[1]
 

@@ -6,4 +6,5 @@ class Base(DeclarativeBase):
     pass
 
 db = SQLAlchemy(model_class=Base)
+use_sql_database = True
 

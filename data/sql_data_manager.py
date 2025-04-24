@@ -215,6 +215,8 @@ class SQLDataManager(DataManager):
         if wrong_fields:
             return {'error': f'Not allowed field(s): {", ".join(wrong_fields)}'}, 400
         db_user = self._get_user_by_id(user_id, return_object=True)
+        if isinstance(db_user, tuple):
+            return {'error': db_user[0]}, db_user[1]
         if 'role' in user.keys():
             user_role_id = db_user.role_id
         if isinstance(db_user, tuple):
@@ -244,6 +246,14 @@ class SQLDataManager(DataManager):
         except exc.IntegrityError as error:
             self.session.rollback()
             return {'error': 'Database error'}, 500
+
+    def get_user_by_name(self, username):
+        db_user = self.session.query(Users).filter_by(username=username).first()
+        if not db_user:
+            raise KeyError(f'User with username "{username}" was not found.')
+        result = db_user.dict
+        result.update({'password': db_user.password})
+        return result 
 
     def _get_user_by_id(self, user_id, return_object=False):
         try:

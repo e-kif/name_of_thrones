@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Mapped, mapped_column, object_session
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import exc
+from sqlalchemy import exc, LargeBinary
 from utils.settings import db
 
 
@@ -19,7 +19,7 @@ class Users(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
+    password: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     role_id: Mapped[str] = mapped_column(db.ForeignKey('roles.id', ondelete='CASCADE'), nullable=False)
 
     roles: Mapped['Roles'] = db.relationship('Roles', uselist=False, back_populates='users') 

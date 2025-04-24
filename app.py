@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from routers import database_bp, characters_bp, errorhandlers_bp, authentication_bp, users_bp
 from data.json_data_manager import JSONDataManager
 from data.sql_data_manager import SQLDataManager
-from utils.settings import db
+from utils.settings import db, use_sql_database
 
 
 def create_app(db_path: str = None, use_sql: bool = False):
@@ -36,7 +36,7 @@ def create_app(db_path: str = None, use_sql: bool = False):
 
 def main():
     """Main function that starts the app"""
-    app = create_app(use_sql=True)
+    app = create_app(use_sql=use_sql_database)
     app.run(debug=True)
 
 
@@ -45,7 +45,6 @@ if __name__ == '__main__':
 
     # todo swagger docs
     # todo pydantic schemas
-    # todo user list + database counterpart
     # todo test coverage
     # todo update requirements
     # todo update readme
