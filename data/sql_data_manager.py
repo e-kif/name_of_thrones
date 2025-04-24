@@ -192,15 +192,14 @@ class SQLDataManager(DataManager):
         role = user.get('role')
         add_user = Users(username=user['username'],
                          password=user['password'])
+        if role:
+            add_user.role = role
         try:
             self.session.add(add_user)
-            self.session.flush()
-            if role and role.strip():
-                add_user.role = role.strip()
             self.session.commit()
             self.session.refresh(add_user)
             return add_user.dict, 201
-        except exc.IntegrityError:
+        except exc.IntegrityError as e:
             self.session.rollback()
             return {'error': f'User {user["username"]} already exists.'}, 409
 
@@ -214,9 +213,17 @@ class SQLDataManager(DataManager):
         delete_user = self._get_user_by_id(user_id, return_object=True)
         if isinstance(delete_user, tuple):
             return delete_user
-        self.session.delete(delete_user)
-        self.session.commit()
-        return delete_user.dict, 200
+        user_dict = delete_user.dict
+        user_role = self.session.query(Roles).filter_by(id=delete_user.role_id).one()
+        try:
+            self.session.delete(delete_user)
+            if not self.session.query(Users).filter_by(role_id=user_role.id).first():
+                self.session.delete(user_role)
+            self.session.commit()
+            return user_dict, 200
+        except exc.IntegrityError as error:
+            self.session.rollback()
+            return {'error': 'Database error'}, 500
 
     def _get_user_by_id(self, user_id, return_object=False):
         try:

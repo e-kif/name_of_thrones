@@ -1,6 +1,7 @@
 import os
 import jwt
 import datetime
+import bcrypt
 import json
 from flask import request, jsonify, current_app
 from functools import wraps
@@ -69,3 +70,7 @@ def generate_access_token(username: str, exp_minutes: int = 30):
     }
     token = jwt.encode(token_payload, current_app.config['SECRET_KEY'], algorithm='HS256')
     return jsonify({'token': token})
+
+def hash_password(password: str) -> str:
+    password_b = password.encode('utf-8')
+    return bcrypt.hashpw((password_b), bcrypt.gensalt())

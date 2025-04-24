@@ -37,3 +37,10 @@ def create_user():
         'password': password,
         'role': role})
     return jsonify(db_user[0]), db_user[1]
+
+
+@users_bp.route('/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id: int):
+    delete_user = current_app.data_manager.delete_user(user_id)
+    return jsonify(delete_user[0]), delete_user[1]
+
