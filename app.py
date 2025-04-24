@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from routers import database_bp, characters_bp, errorhandlers_bp, authentication_bp
 from data.json_data_manager import JSONDataManager
 from data.sql_data_manager import SQLDataManager
-from models.characters import db
+from utils.settings import db
 
 
 def create_app(db_path: str = None, use_sql: bool = False):

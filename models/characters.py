@@ -1,15 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, object_session
+from sqlalchemy.orm import Mapped, mapped_column, object_session
 from sqlalchemy.ext.hybrid import hybrid_property
-# from flask import current_app
 from sqlalchemy import select
+from utils.settings import db
 
-
-class Base(DeclarativeBase):
-    pass
-
-
-db = SQLAlchemy(model_class=Base)
 
 character_house = db.Table(
     'character_house',
