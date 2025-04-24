@@ -213,7 +213,7 @@ class SQLDataManager(DataManager):
     def update_user(self, user_id, user):
         wrong_fields = set(user.keys()).difference(Users.allowed_fields)
         if wrong_fields:
-            return jsonify({'error': f'Not allowed field(s): {", ".join(wrong_fields)}'}), 400
+            return {'error': f'Not allowed field(s): {", ".join(wrong_fields)}'}, 400
         db_user = self._get_user_by_id(user_id, return_object=True)
         if 'role' in user.keys():
             user_role_id = db_user.role_id
@@ -223,7 +223,7 @@ class SQLDataManager(DataManager):
         try:
             self.session.flush()
             if 'role' in user.keys():
-                self._check_orphan_user_role(user_rile_id)
+                self._check_orphan_user_role(user_role_id)
             self.session.commit()
             self.session.refresh(db_user)
             return db_user.dict, 200

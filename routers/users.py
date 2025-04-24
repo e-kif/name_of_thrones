@@ -50,8 +50,21 @@ def read_user(user_id: int):
     db_user = current_app.data_manager.read_user(user_id)
     return jsonify(db_user[0]), db_user[1]
 
+
 @users_bp.route('/', methods=['GET'])
 def read_users():
     db_users = current_app.data_manager.read_users()
     return jsonify(db_users[0]), db_users[1]
+
+
+@users_bp.route('/<int:user_id>', methods=['PUT'])
+def update_user(user_id: int):
+    data = request.get_json()
+    if not any(['username' in data, 'password' in data, 'role' in data]):
+        return jsonify({'error': 'None of the fields was provided ("username", "password", "role")'}), 400
+    wrong_fields = set(data.keys()).difference({'username', 'password', 'role'})
+    if wrong_fields:
+        return jsonify({'error': f'Not allowed field(s): {", ".join(wrong_fields)}.'}), 400
+    updated_user = current_app.data_manager.update_user(user_id, data)
+    return jsonify(updated_user[0]), updated_user[1]
 
