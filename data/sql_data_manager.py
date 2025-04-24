@@ -211,18 +211,34 @@ class SQLDataManager(DataManager):
         return [user.dict for user in users], 200 if users else 404
 
     def update_user(self, user_id, user):
-        pass
+        wrong_fields = set(user.keys()).difference(Users.allowed_fields)
+        if wrong_fields:
+            return jsonify({'error': f'Not allowed field(s): {", ".join(wrong_fields)}'}), 400
+        db_user = self._get_user_by_id(user_id, return_object=True)
+        if 'role' in user.keys():
+            user_role_id = db_user.role_id
+        if isinstance(db_user, tuple):
+            return db_user[0], db_user[1]
+        [setattr(db_user, key, value) for key, value in user.items()]
+        try:
+            self.session.flush()
+            if 'role' in user.keys():
+                self._check_orphan_user_role(user_rile_id)
+            self.session.commit()
+            self.session.refresh(db_user)
+            return db_user.dict, 200
+        except exc.IntegrityError:
+            return {'error': f'User with name {user["name"]} already exists'}, 409
 
     def delete_user(self, user_id):
         delete_user = self._get_user_by_id(user_id, return_object=True)
         if isinstance(delete_user, tuple):
             return delete_user
         user_dict = delete_user.dict
-        user_role = self.session.query(Roles).filter_by(id=delete_user.role_id).one()
+        user_role_id = delete_user.role_id
         try:
             self.session.delete(delete_user)
-            if not self.session.query(Users).filter_by(role_id=user_role.id).first():
-                self.session.delete(user_role)
+            self._check_orphan_user_role(user_role_id)
             self.session.commit()
             return user_dict, 200
         except exc.IntegrityError as error:
@@ -235,3 +251,9 @@ class SQLDataManager(DataManager):
             return db_user if return_object else (db_user.dict, 200)
         except exc.NoResultFound:
             return {'error': f'User with id={user_id} was not found.'}, 404
+
+    def _check_orphan_user_role(self, role_id):
+        role = self.session.query(Roles).filter_by(id=role_id).one()
+        if not self.session.query(Users).filter_by(role_id=role_id).first():
+            self.session.delete(role)
+
