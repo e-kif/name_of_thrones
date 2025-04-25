@@ -28,3 +28,23 @@ def test_json_db_integration():
     assert json_db().__getattribute__('characters'), 'Characters getter method is missing'
     with pytest.raises(FileNotFoundError):
         assert json_db('some_file.json'), 'Non existent file does not raise an exception'
+
+
+def test_main_app_run(monkeypatch):
+    called = {}
+
+    class FakeApp:
+        def run(self, debug):
+            called['run'] = debug
+
+    def fake_create_app(use_sql):
+        called['create_app'] = use_sql
+        return FakeApp()
+
+    monkeypatch.setattr('app.create_app', fake_create_app)
+    from app import main
+    main()
+
+    assert 'create_app' in called
+    assert called['run'] is True
+
