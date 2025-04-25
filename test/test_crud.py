@@ -145,9 +145,7 @@ def test_sql_delete_operation(sql_db, jon_snow):
 
 def test_sql_update_operation(sql_db, jon_snow, olenna_tyrell):
     sql_db._reset_database()
-    print([char['name'] for char in sql_db.read_characters(limit=50)[0]])
     assert sql_db.update_character(1, {'name': 'Gendalf'})[0]['name'] == 'Gendalf', 'Function returns not updated field'
-    print([char['name'] for char in sql_db.read_characters(limit=50)[0]])
     jon_snow.update({'name': 'Gendalf'})
     assert sql_db.read_character(1)[0] == jon_snow, 'Character was not updated in the database'
     with pytest.raises(AttributeError):
@@ -156,3 +154,9 @@ def test_sql_update_operation(sql_db, jon_snow, olenna_tyrell):
         sql_db.update_character(5, {'hair': None}), 'Update with not allowed field'
     with pytest.raises(AttributeError):
         sql_db.update_character(22, {'name': olenna_tyrell['name']}), 'Update with not allowed field'
+
+
+def test_sql_user_creation(sql_db):
+    assert sql_db.add_user({'username': 'no-password', 'role': 'careless'})[1] == 400, 'Wrong status code for incorrect add user request'
+    assert sql_db.add_user({'username': 'no-password', 'role': 'careless'})[0] == {'error': 'Missing required field(s): password.'}, 'Wrong status code for incorrect add user request'
+

@@ -1,17 +1,17 @@
 import pytest
-from utils.security import is_user_credentials_valid
 
 
-def test_is_user_credentials_valid():
-    assert is_user_credentials_valid('Michael', 'Scott')
-    assert is_user_credentials_valid('michael', 'Scott')
-    assert is_user_credentials_valid('miCHael', 'Scott')
+def test_is_user_credentials_valid_json(validate_user_json):
+    assert validate_user_json('Michael', 'Scott')
+    assert validate_user_json('michael', 'Scott')  
+    assert validate_user_json('miCHael', 'Scott')
     with pytest.raises(KeyError):
-        assert not is_user_credentials_valid('Micha', 'Scott')
-    assert not is_user_credentials_valid('Michael', 'scott')
+        assert not validate_user_json('Micha', 'Scott')
+    assert not validate_user_json('Michael', 'scott')
 
 
-def test_tocken_generation_sql(sql_client):
+def test_tocken_generation_sql(sql_client, sql_db):
+    sql_client.get('/database/reset') 
     with pytest.raises(Exception):
         sql_client.post('/login', json={'username': 'micha', 'password': 'whatever'})
     missing_user = sql_client.post('/login', json={'password': 'qwerty'})
@@ -22,7 +22,7 @@ def test_tocken_generation_sql(sql_client):
     assert missing_password.json == {'error': 'Missing username or password'}, 'Wrong message on missing password'
     with pytest.raises(KeyError):
         sql_client.post('/login', json={'username': 'qwerty', 'password': 'qwerty'})
-    correct_token = sql_client.post('/login', json={'username': 'michael', 'password': 'Scott'})
+    correct_token = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scott'})
     assert correct_token.status_code == 200, 'Wrong status code on successful token'
     assert correct_token.json.get('token'), 'There is no token key in response'
     sql_client.get('/database/reset', headers={'Authorization': f'Bearer {correct_token.json["token"]}'})
