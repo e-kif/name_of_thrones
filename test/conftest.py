@@ -4,60 +4,76 @@ import tempfile
 import json
 from app import create_app
 from data.json_data_manager import JSONDataManager as json_data_manager
-
-
-# def test_app(db_uri, use_sql: bool = True):
-#     if use_sql:
-#         app = create_app(db_uri)
-#     else:
-#         app = create_app(db_uri)
-#     app.config['TESTING'] = True
-#     return app
+from utils.security import is_user_credentials_valid
 
 
 @pytest.fixture(scope='function')
-def client():
-    """Test client setup with temporary database file"""
+def json_app():
+    """"Test application that uses in-memory JSON file as a storage"""
     db_fd, db_path = tempfile.mkstemp()
-
     with open(os.path.join('storage', 'characters.json'), 'r', encoding='utf8') as original:
         with open(db_path, 'w', encoding='utf8') as f:
             f.write(json.dumps(json.loads(original.read())))
-
-    app = create_app(db_path)
-
-    with app.test_client() as client:
-        yield client
-
+    app = create_app(db_path, use_sql=False)
+    app.config['TESTING'] = True
+    yield app
     os.close(db_fd)
     os.remove(db_path)
 
 
 @pytest.fixture(scope='function')
-def json_db():
-    """JSON database manager with in-memory storage"""
-    return json_data_manager()
+def json_client(json_app):
+    """Test client setup with temporary database file"""
+    with json_app.test_client() as client:
+        yield client
 
 
 @pytest.fixture(scope='function')
-def sql_db():
-    """In-memory sql database instance for testing CRUD operations"""
-    # db_uri = 'postgres://user:password@host/mock_db'
+def json_db(json_app):
+    """JSON database manager with in-memory storage"""
+    yield json_app.data_manager
+
+
+@pytest.fixture(scope='function')
+def sql_app():
+    """Test app that uses in-memory sql database as a storage"""
     db_uri = 'sqlite:///:memory:'
     app = create_app(db_uri, use_sql=True)
     app.config['TESTING'] = True
-    with app.app_context():
-        yield app.data_manager
+    yield app
+
+
+@pytest.fixture(scope='function')
+def sql_db(sql_app):
+    """In-memory sql database instance for testing CRUD operations"""
+    with sql_app.app_context():
+        yield sql_app.data_manager
     
 
 @pytest.fixture(scope='function')
-def sql_client():
+def sql_client(sql_app):
     """Client for testing endpoints using in-memory sql database"""
-    db_uri = 'sqlite:///:memory:'
-    app = create_app(db_uri, use_sql=True)
-    app.config['TESTING'] = True
-    with app.test_client() as client:
+    with sql_app.test_client() as client:
         yield client
+
+
+@pytest.fixture()
+def headers_json(json_client):
+    token = json_client.post('/login', json={'username': 'Michael', 'password': 'Scott'}).json['token']
+    yield {'Authorization': f'Bearer {token}'}
+
+
+@pytest.fixture(scope='function')
+def headers_sql(sql_client, sql_db):
+    sql_db._reset_users()
+    token = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scott'}).json['token']
+    yield {'Authorization': f'Bearer {token}'}
+
+
+@pytest.fixture()
+def validate_user_json(json_app):
+    with json_app.app_context():
+        yield is_user_credentials_valid
 
 
 @pytest.fixture()
@@ -120,14 +136,3 @@ def aemon():
             'role': 'Maester of the Night\'s Watch',
             'strength': 'Wisdom and loyalty'}
 
-
-@pytest.fixture()
-def headers_json(client):
-    token = client.post('/login', json={'username': 'michael', 'password': 'Scott'}).json['token']
-    return {'Authorization': f'Bearer {token}'}
-
-
-@pytest.fixture()
-def headers_sql(sql_client):
-    token = sql_client.post('/login', json={'username': 'michael', 'password': 'Scott'}).json['token']
-    return {'Authorization': f'Bearer {token}'}
