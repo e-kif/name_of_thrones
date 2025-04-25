@@ -1,6 +1,7 @@
 import pytest
 
 
+# @pytest.mark.skip()
 def test_is_user_credentials_valid_json(validate_user_json):
     assert validate_user_json('Michael', 'Scott')
     assert validate_user_json('michael', 'Scott')  
@@ -10,6 +11,7 @@ def test_is_user_credentials_valid_json(validate_user_json):
     assert not validate_user_json('Michael', 'scott')
 
 
+# @pytest.mark.skip()
 def test_tocken_generation_sql(sql_client, sql_db):
     sql_client.get('/database/reset') 
     with pytest.raises(Exception):
@@ -29,13 +31,16 @@ def test_tocken_generation_sql(sql_client, sql_db):
     assert sql_client.delete('/characters/33', headers={'Authorization': f'Bearer {correct_token.json["token"]}'}).status_code == 200
     
 
-def test_sql_protected_endpoints(sql_client, headers_sql):
+# @pytest.mark.skip()
+def test_sql_protected_endpoints(sql_client, headers_sql, robert_baratheon):
     non_auth = sql_client.post('/characters/')
     assert non_auth.status_code == 401, 'Wrong status code for protected endpoint'
     assert non_auth.json ==  {'error': 'Authenification failed: no token provided.'}
-    wrong_username_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pY2hhIiwicm9sZSI6IlJlY2VwdGlvbmlzdCIsImV4cCI6MTc0NTQxMDA0MX0.V-x-Ih0aVmha7JohOEtkMdbTwn9roqpEs-Z9uEKfHw8"
-    with pytest.raises(Exception):
-        sql_client.post('/characters/', heders={'Authorization': f'Bearer {wrong_username_token}'})
+    ghost_id = sql_client.post('/users/', json={'username': 'tmp', 'password': 't', 'role': 'Ghoust'}).json['id']
+    ghost_token = sql_client.post('/login', json={'username': 'tmp', 'password': 't'}).json['token']
+    sql_client.delete(f'/users/{ghost_id}')
+    with pytest.raises(KeyError):
+       sql_client.post('/characters/', json=robert_baratheon, headers={'Authorization': f'Bearer {ghost_token}'})
     expired_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlBhbSIsInJvbGUiOiJSZWNlcHRpb25pc3QiLCJleHAiOjE3NDU0MTIwNzh9.LuZeRxWouTQ8w-S1SfKZDufCFD1Qu0rmr9ZAFXntxR4"
     expired = sql_client.post('/characters/', headers={'Authorization': f'Bearer {expired_token}'})
     assert expired.status_code == 401

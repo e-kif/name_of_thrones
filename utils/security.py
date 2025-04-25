@@ -26,8 +26,6 @@ def token_required(endpoint_function):
         try:
             payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
             current_user = current_app.data_manager.get_user_by_name(payload['username'])
-            if not current_user:
-                raise Exception('User not found.')
         except jwt.ExpiredSignatureError:
             return jsonify({'error': 'Token has expired.'}), 401
         except jwt.InvalidTokenError:
