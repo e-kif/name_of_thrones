@@ -127,6 +127,8 @@ def test_sql_create_operation(sql_db, robert_baratheon):
         sql_db.add_character({'id': 55, 'name': 'Mock', 'role': 'Mocker', 'strength': 'Mocking'})
     with pytest.raises(ValueError):
         sql_db.add_character({'role': 'Nameless person', 'strength': 'Stealth'})
+    with pytest.raises(AttributeError):
+        sql_db.add_character(robert_baratheon)
 
 
 def test_sql_delete_operation(sql_db, jon_snow):
@@ -158,5 +160,37 @@ def test_sql_update_operation(sql_db, jon_snow, olenna_tyrell):
 
 def test_sql_user_creation(sql_db):
     assert sql_db.add_user({'username': 'no-password', 'role': 'careless'})[1] == 400, 'Wrong status code for incorrect add user request'
-    assert sql_db.add_user({'username': 'no-password', 'role': 'careless'})[0] == {'error': 'Missing required field(s): password.'}, 'Wrong status code for incorrect add user request'
+    assert sql_db.add_user({'username': 'no-password', 'role': 'careless'})[0] == {'error': 'Missing required field(s): password.'}, 'Wrong message for incorrect add user request'
+    correct_user = sql_db.add_user({'username': 'user', 'password': '12345', 'role': 'careless'})
+    assert correct_user[1] == 201, 'Wrong status code for correct add user request'
+    assert correct_user[0] == {'username': 'user', 'id': 1, 'role': 'careless'}, 'Wrong return for correct add user request'
+    assert sql_db.add_user({'username': 'Rex', 'password': 'T', 'role': 'Dino', 'color': 'green'}) == ({'error': 'Not allowed field(s): color.'}, 400), 'Wrong return for wrong field user creation'
+    assert sql_db.add_user({'username': 'user', 'password': '12345', 'role': 'careless'}) == ({'error': 'User user already exists.'}, 409)
 
+
+def test_sql_read_users(sql_db):
+    assert sql_db.read_user(1) == ({'error': 'User with id=1 was not found.'}, 404), 'Wrong return on user not found'
+    sql_db.add_user({'username': 'user', 'password': '12345', 'role': 'careless'})
+    assert sql_db.read_user(1) == ({'username': 'user', 'role': 'careless', 'id': 1}, 200), 'Wrong return on found user'
+    users = sql_db.read_users()
+    assert isinstance(users[0], list), 'Wrong return type for read_users sql method'
+    assert len(users[0]) == 1, 'Wrong amount of users'
+    assert users == ([{'username': 'user', 'role': 'careless', 'id': 1}], 200), 'Wrong return on read_users method'
+    
+    
+def test_sql_update_user(sql_db):
+    sql_db._reset_users()
+    assert sql_db.update_user(1, {'eye color': 'green'}) == ({'error': 'Not allowed field(s): eye color.'}, 400), 'Wrong return on user update with wrong field'
+    assert sql_db.update_user(10, {'password': 'that is what she said'}) == ({'error': 'User with id=10 was not found.'}, 404), 'Wrong return on user not found for update user'
+    assert sql_db.update_user(4, {'role': 'Assistant Regional Manager'}) == ({'username': 'Dwight', 'role': 'Assistant Regional Manager', 'id': 4}, 200), 'Wrong return on successful user role change'
+    assert sql_db.update_user(3, {'username': 'Michael'}) == ({'error': 'User with name Michael already exists.'}, 409), 'Wrong return on update user name to existing user'
+
+
+def test_sql_delete_user(sql_db):
+    sql_db._reset_users()
+    total_users = len(sql_db.read_users()[0])
+    assert sql_db.delete_user(3) == ({'username': 'Pam', 'id': 3, 'role': 'Receptionist'}, 200), 'Wrong return on user delete'
+    assert len(sql_db.read_users()[0]) == total_users - 1, 'User count did not change after deleting a user'
+    assert sql_db.delete_user(88) == ({'error': 'User with id=88 was not found.'}, 404), 'Wrong return on deleting non existing user'
+    
+    

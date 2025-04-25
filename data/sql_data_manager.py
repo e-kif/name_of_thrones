@@ -129,21 +129,14 @@ class SQLDataManager(DataManager):
         character_opt = {key: value for key, value in character.items()\
                          if value is not None and key in Characters.opt_fields}
         add_character = Characters(**character_req)
-        try:
-            self.session.add(add_character)
-            self.session.flush()
-            if character_opt:
-                [setattr(add_character, key, value) for key, value in character_opt.items()]
-            self.session.commit()
-            if refresh:
-                self.session.refresh(add_character)
-            return (add_character.dict, 201) if refresh else (character, 201)
-        except exc.IntegrityError as error:
-            self.session.rollback()
-            return {'message': 'Integrity error occurred.', 'error': str(error)}, 409
-        except exc.SQLAlchemyError as error:
-            self.session.rollback()
-            return {'message': f'A database error occurred.', 'error': str(error)}, 500
+        self.session.add(add_character)
+        self.session.flush()
+        if character_opt:
+            [setattr(add_character, key, value) for key, value in character_opt.items()]
+        self.session.commit()
+        if refresh:
+            self.session.refresh(add_character)
+        return (add_character.dict, 201) if refresh else (character, 201)
 
     def remove_character(self, character_id):
         if not isinstance(character_id, int):
@@ -165,12 +158,8 @@ class SQLDataManager(DataManager):
         if not isinstance(upd_character, Characters):
             return upd_character[0], 400
         [setattr(upd_character, key, value) for key, value in character.items()]
-        try:
-            self.session.commit()
-            self.session.refresh(upd_character)
-        except exc.IntegrityError:
-            self.session.rollback()
-            raise exc.IntegrityError
+        self.session.commit()
+        self.session.refresh(upd_character)
         return upd_character.dict, 200
 
     def __len__(self):
@@ -179,12 +168,8 @@ class SQLDataManager(DataManager):
     def _delete(self, instance):
         """Delete an instance from the database with error handling and rollback"""
         instance_dict = instance.dict
-        try:
-            self.session.delete(instance)
-            self.session.commit()
-        except exc.SQLAlchemyError as error:
-            self.session.rollback()
-            return {'message': 'A database error occurred.', 'error': str(error)}, 500
+        self.session.delete(instance)
+        self.session.commit()
         return instance_dict, 200
     
     def _character_exists(self, character_name: str) -> bool:
@@ -202,6 +187,8 @@ class SQLDataManager(DataManager):
         if wrong_fields:
             return {'error': f'Not allowed field(s): {", ".join(wrong_fields)}.'}, 400
         role = user.get('role')
+        if not isinstance(user['password'], bytes):
+            user['password'] = hash_password(user['password'])
         add_user = Users(username=user['username'],
                          password=user['password'])
         if role:
@@ -225,14 +212,12 @@ class SQLDataManager(DataManager):
     def update_user(self, user_id, user):
         wrong_fields = set(user.keys()).difference(Users.allowed_fields)
         if wrong_fields:
-            return {'error': f'Not allowed field(s): {", ".join(wrong_fields)}'}, 400
+            return {'error': f'Not allowed field(s): {", ".join(wrong_fields)}.'}, 400
         db_user = self._get_user_by_id(user_id, return_object=True)
         if isinstance(db_user, tuple):
-            return {'error': db_user[0]}, db_user[1]
+            return db_user[0], db_user[1]
         if 'role' in user.keys():
             user_role_id = db_user.role_id
-        if isinstance(db_user, tuple):
-            return db_user[0], db_user[1]
         [setattr(db_user, key, value) for key, value in user.items()]
         try:
             self.session.flush()
@@ -242,7 +227,7 @@ class SQLDataManager(DataManager):
             self.session.refresh(db_user)
             return db_user.dict, 200
         except exc.IntegrityError:
-            return {'error': f'User with name {user["name"]} already exists'}, 409
+            return {'error': f'User with name {user["username"]} already exists.'}, 409
 
     def delete_user(self, user_id):
         delete_user = self._get_user_by_id(user_id, return_object=True)
@@ -250,14 +235,10 @@ class SQLDataManager(DataManager):
             return delete_user
         user_dict = delete_user.dict
         user_role_id = delete_user.role_id
-        try:
-            self.session.delete(delete_user)
-            self._check_orphan_user_role(user_role_id)
-            self.session.commit()
-            return user_dict, 200
-        except exc.IntegrityError as error:
-            self.session.rollback()
-            return {'error': 'Database error'}, 500
+        self.session.delete(delete_user)
+        self._check_orphan_user_role(user_role_id)
+        self.session.commit()
+        return user_dict, 200
 
     def get_user_by_name(self, username):
         db_user = self.session.query(Users).filter_by(username=username).first()
