@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
 
 errorhandlers_bp = Blueprint('errors', __name__)
 
@@ -10,4 +10,6 @@ def not_found_error(error):
 
 @errorhandlers_bp.app_errorhandler(500)
 def internal_server_error(error):
-    return jsonify({'error': str(error)}), 500
+    return jsonify({'error': 'Internal Server Error'}), 500
+
+

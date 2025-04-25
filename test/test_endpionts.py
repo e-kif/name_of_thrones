@@ -1,3 +1,7 @@
+import pytest
+
+
+# @pytest.mark.skip()
 def test_read_characters_json(json_client, jon_snow, daenerys, olenna_tyrell):
     random20 = json_client.get('/characters/', follow_redirects=True)
     assert random20.status_code == 200, 'Endpoint returns wrong status code'
@@ -35,6 +39,7 @@ def test_read_characters_json(json_client, jon_snow, daenerys, olenna_tyrell):
     assert wrong_sorting_value.json == {'error': 'Wrong sorting parameter beauty.'}, 'Wrong message code for wrong sorting value'
 
 
+# @pytest.mark.skip()
 def test_read_character_json(json_client, jon_snow, daenerys, olenna_tyrell):
     jon = json_client.get('/characters/1')
     dany = json_client.get('/characters/2')
@@ -52,6 +57,7 @@ def test_read_character_json(json_client, jon_snow, daenerys, olenna_tyrell):
     assert response4.status_code == 404, 'Endpoint returns wrong response code'
 
 
+# @pytest.mark.skip()
 def test_create_character_json(json_client, daenerys, robert_baratheon, aemon, headers_json):
     robert = json_client.post('/characters', json=robert_baratheon, headers=headers_json, follow_redirects=True)
     assert robert.status_code == 201, 'Wrong status code for character creation'
@@ -104,6 +110,7 @@ def test_create_character_json(json_client, daenerys, robert_baratheon, aemon, h
     assert create_dany.json == {'error': f'Character {daenerys["name"]} already exists.'}, 'Wrong error message on creating existing character'
 
 
+# @pytest.mark.skip()
 def test_delete_character_json(json_client, jon_snow, daenerys, olenna_tyrell, headers_json):
     jon = json_client.delete('/characters/1', headers=headers_json)
     assert jon.status_code == 200
@@ -121,6 +128,7 @@ def test_delete_character_json(json_client, jon_snow, daenerys, olenna_tyrell, h
     assert json_client.delete('/characters/1', headers=headers_json).status_code == 404
 
 
+# @pytest.mark.skip()
 def test_update_character_json(json_client, jon_snow, daenerys, olenna_tyrell, headers_json):
     jon_gendalf = json_client.put('/characters/1', json={'name': 'Gendalf'}, headers=headers_json)
     assert jon_gendalf.json['name'] == 'Gendalf', 'Field was not updated'
@@ -134,6 +142,7 @@ def test_update_character_json(json_client, jon_snow, daenerys, olenna_tyrell, h
 
 
 
+# @pytest.mark.skip()
 def test_read_characters_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
     sql_client.get('/database/reset')
     random20 = sql_client.get('/characters', follow_redirects=True)
@@ -172,6 +181,7 @@ def test_read_characters_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
     assert wrong_sorting_value.json == {'error': 'Wrong sorting parameter beauty.'}, 'Wrong message code for wrong sorting value'
 
 
+# @pytest.mark.skip()
 def test_read_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
     sql_client.get('/database/reset')
     jon = sql_client.get('/characters/1')
@@ -190,6 +200,7 @@ def test_read_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
     assert response4.status_code == 404, 'Endpoint returns wrong response code'
 
 
+# @pytest.mark.skip()
 def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon, headers_sql):
     sql_client.get('/database/reset')
     robert = sql_client.post('/characters', json=robert_baratheon, headers=headers_sql, follow_redirects=True)
@@ -244,6 +255,7 @@ def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon, hea
     assert create_dany.json == {'error': f'Character {daenerys["name"]} already exists.'}, 'Wrong error message on creating existing character'
 
 
+# @pytest.mark.skip()
 def test_delete_character_sql(sql_client, jon_snow, headers_sql):
     sql_client.get('/database/reset')
     jon = sql_client.delete('/characters/1', headers=headers_sql)
@@ -262,6 +274,7 @@ def test_delete_character_sql(sql_client, jon_snow, headers_sql):
     assert sql_client.delete('/characters/1', headers=headers_sql).status_code == 404
 
 
+# @pytest.mark.skip()
 def test_update_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell, headers_sql):
     sql_client.get('/database/reset')
     jon_gendalf = sql_client.put('/characters/1', json={'name': 'Gendalf'}, headers=headers_sql)
@@ -273,3 +286,12 @@ def test_update_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell, hea
     id_update = sql_client.put('/characters/23', json={'id': 12, 'name': 'Helly R'}, headers=headers_sql)
     assert id_update.status_code == 400, 'ID update is prohibited'
     assert id_update.json == {'error': 'Updating ID field is not allowed.'}, 'Wrong message for id update error'
+
+
+# @pytest.mark.skip()
+def test_crash_endpoint(sql_app, sql_client):
+    sql_app.config['PROPAGATE_EXCEPTIONS'] = False
+    crash = sql_client.get('/crash')
+    assert crash.json == {'error': 'Internal Server Error'}
+    sql_app.config['PROPAGATE_EXCEPTIONS'] = True
+

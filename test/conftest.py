@@ -40,6 +40,10 @@ def sql_app():
     db_uri = 'sqlite:///:memory:'
     app = create_app(db_uri, use_sql=True)
     app.config['TESTING'] = True
+    with app.app_context():
+        @app.route('/crash')
+        def crash():
+            raise RuntimeError('Testing crash')
     yield app
 
 
