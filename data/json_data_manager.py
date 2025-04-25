@@ -14,7 +14,10 @@ class JSONDataManager(DataManager):
             self,
             storage_file: str = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)), '..',
-                'storage', 'characters.json')
+                'storage', 'characters.json'),
+            users_file: str = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), '..',
+                'storage', 'users.json'),
             ):
         """Constructor method loads data from json file, sorts the list by character IDs,
         assigns sorted character list to self.storage instance variable, creates variable
@@ -22,6 +25,7 @@ class JSONDataManager(DataManager):
         """
         self.storage = sorted(self.load_json_file(storage_file), key=lambda character: character['id'])
         self.next_character_index = len(self) + 1
+        self.users = sorted(self.load_json_file(users_file), key=lambda user: user['id'])
 
     def load_json_file(self, filename: str) -> list | dict:
         """Loads info from JSON file as a Python object (list or dictionary)"""
@@ -159,3 +163,10 @@ class JSONDataManager(DataManager):
             if character['name'] == character_name:
                 return True
         return False
+
+    def get_user_by_name(self, username: str) -> dict:
+        user_list = [user for user in self.users if user['username'].lower() == username.lower()]
+        if not user_list:
+            raise KeyError(f'User with username "{username}" was not found')
+        return user_list[0]
+

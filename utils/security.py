@@ -5,7 +5,6 @@ import bcrypt
 import json
 from flask import request, jsonify, current_app
 from functools import wraps
-from utils.settings import use_sql_database
 
 
 def token_required(endpoint_function):
@@ -26,7 +25,7 @@ def token_required(endpoint_function):
 
         try:
             payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
-            current_user = get_user_by_name(payload['username'])
+            current_user = current_app.data_manager.get_user_by_name(payload['username'])
             if not current_user:
                 raise Exception('User not found.')
         except jwt.ExpiredSignatureError:
@@ -38,39 +37,16 @@ def token_required(endpoint_function):
     return wrapper
 
 
-def get_users(users_file: str = os.path.join('storage', 'users.json'),
-              use_sql: bool = use_sql_database) -> list[dict]:
-    """Reads users from a json file or from a database"""
-    if use_sql:
-        users = current_app.data_manager.get_users()
-        return users
-    with open(users_file, 'r', encoding='utf8') as file:
-        return json.loads(file.read())
-    
-
-def get_user_by_name(username: str, use_sql: bool = use_sql_database) -> dict:
-    """Returns user dict found by username in users.json file or in database.
-    If user not found - raises KeyError"""
-    if use_sql:
-        db_user = current_app.data_manager.get_user_by_name(username)
-        return db_user
-    users = get_users()
-    for user in users:
-        if user['username'].lower() == username.lower():
-            return user
-    raise KeyError(f'User with username {username} was not found.')
-
-
 def is_user_credentials_valid(username: str, password: str) -> bool:
     """Returns True if both username and password are valid,
     otherwise - False"""
-    user = get_user_by_name(username)
-    return bcrypt.checkpw(password.encode(), user['password']) if use_sql_database\
+    user = current_app.data_manager.get_user_by_name(username)
+    return bcrypt.checkpw(password.encode(), user['password']) if current_app.config['USE_SQL']\
             else password == user['password']
 
 def generate_access_token(username: str, exp_minutes: int = 30):
     """Generates JWT access token with encoded username, role and expiration time"""
-    user = get_user_by_name(username)
+    user = current_app.data_manager.get_user_by_name(username)
     token_payload = {
         'username': user['username'],
         'role': user['role'],

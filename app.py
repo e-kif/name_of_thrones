@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, g
 from dotenv import load_dotenv
 from routers import database_bp, characters_bp, errorhandlers_bp, authentication_bp, users_bp
 from data.json_data_manager import JSONDataManager
@@ -25,8 +25,11 @@ def create_app(db_path: str = None, use_sql: bool = False):
     else:
         app.data_manager = JSONDataManager(db_path) if db_path\
             else JSONDataManager(os.path.join('storage', 'characters.json'))
+        with app.app_context():
+            g.use_sql = use_sql
     
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['USE_SQL'] = use_sql
     app.register_blueprint(characters_bp, url_prefix='/characters')
     app.register_blueprint(errorhandlers_bp)
     app.register_blueprint(authentication_bp)
