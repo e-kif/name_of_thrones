@@ -53,7 +53,12 @@ def dynamic_hybrid_property(property_name, attribute_name, model_class,
             return item
         
         if value is None:
-            relation.clear()
+            if secondary_table is not None:
+                db.session.execute(secondary_table.delete().where(secondary_table.c.character_id == self.id))
+            else:
+                del_item = db.session.query(model_class).filter_by(character_id=self.id).one()
+                db.session.delete(del_item)
+            db.session.commit()
         else:
             setattr(self, attribute_name, resolve(value))
 
@@ -87,7 +92,7 @@ class Death(db.Model):
     character_id: Mapped[int] = mapped_column(db.ForeignKey('characters.id'), nullable=False, unique=True)
 
     def __repr__(self):
-        return f'{self.character.name} dead in season {self.death}'
+        return f'{self.character.name} died in season {self.death}'
 
 
 class Houses(db.Model):
@@ -120,7 +125,7 @@ class Nicknames(db.Model):
     character_id: Mapped[int] = mapped_column(db.ForeignKey('characters.id'), nullable=False)
 
     def __repr__(self):
-        return f'{self.character.name} AKA {self.name} ({self.id})'
+        return f'{self.characters.name} AKA {self.name} ({self.id})'
     
 
 class Characters(db.Model):
@@ -165,3 +170,4 @@ class Characters(db.Model):
     
     def __repr__(self):
         return f'{self.id}. {self.name} (age {self.age}, death {self.death}, house {self.house})'
+

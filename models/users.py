@@ -36,6 +36,8 @@ class Users(db.Model):
             user_role = db.session.query(Roles).filter_by(name=role).first()
             if user_role:
                 self.role_id = user_role.id
+                if 'roles' in self.__dict__:  # clear cashed role
+                    del self.__dict__['roles']
             else:
                 user_role = Roles(**{'name': role})
                 db.session.add(user_role)
