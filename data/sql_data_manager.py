@@ -4,6 +4,7 @@ from data.data_manager import DataManager
 from models.characters import *
 from models.users import Users, Roles
 from data.json_data_manager import JSONDataManager
+from utils.security import hash_password
 
 
 class SQLDataManager(DataManager):
@@ -15,11 +16,22 @@ class SQLDataManager(DataManager):
     def _reset_database(self):
         """Drops all tables, creates them and loads characters from json file"""
         json_characters = JSONDataManager().read_characters(limit=50)[0]
+        json_users = JSONDataManager().users
         self.db.drop_all()
         self.db.create_all()
         for character in json_characters:
             del character['id']
             self.add_character(character, refresh=False)
+        self._reset_users()
+
+    def _reset_users(self):
+        json_users = JSONDataManager().users
+        [(table.__table__.drop(self.db.engine), table.__table__.create(self.db.engine)) for table in {Users, Roles}]
+        for user in json_users:
+            del user['id']
+            user['password'] = hash_password(user['password'])
+            self.add_user(user)
+
 
     def read_character(self, character_id: int, return_object=False):
         """Returns a character with id = character_id or an error message
@@ -182,7 +194,7 @@ class SQLDataManager(DataManager):
         except exc.NoResultFound:
             return False
 
-    def add_user(self, user: dict):
+    def add_user(self, user: dict, refresh=True):
         missing_fields = Users.req_fields.difference(set(user.keys()))
         if missing_fields:
             return {'error': f'Missing required field(s): {", ".join(missing_fields)}.'}, 400
