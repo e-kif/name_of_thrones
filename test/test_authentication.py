@@ -34,6 +34,9 @@ def test_tocken_generation_sql(sql_client, sql_db):
 
 @pytest.mark.skipif(skip_tests['authentication'], reason='Skipped by config')
 def test_sql_protected_endpoints(sql_client, headers_sql, robert_baratheon):
+    wrong_credentials = sql_client.post('/login', json={'username': 'Michael', 'password': 'der_password'})
+    assert wrong_credentials.status_code == 401, 'Wrong status code for invalid credentials'
+    assert wrong_credentials.json == {'error': 'Invalid username or password'}, 'Wrong message for invalid credentials'
     non_auth = sql_client.post('/characters/')
     assert non_auth.status_code == 401, 'Wrong status code for protected endpoint'
     assert non_auth.json ==  {'error': 'Authenification failed: no token provided.'}

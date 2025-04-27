@@ -20,15 +20,16 @@ def login():
 @users_bp.route('/', methods=['POST'])
 def create_user():
     data = request.get_json()
-    if any([not data, 'username' not in data, 'password'not in data]):
-        return jsonify({'error': 'Missing required field(s)'}), 400
+    missing_fields = {'username', 'password'}.difference(set(data.keys()))
+    if missing_fields:
+        return jsonify({'error': f'Missing required field(s): {", ".join(missing_fields)}.'}), 400
 
     username, password, role = data['username'], hash_password(data['password']), data.get('role')
-    if username.strip == '':
-        return jsonify({'error': 'Username can not be empty'}), 400
+    if username.strip() == '':
+        return jsonify({'error': 'Username can not be empty.'}), 400
     forbidden_fields = set(data.keys()).difference({'username', 'password', 'role'})
     if forbidden_fields:
-        return jsonify({'error': f'Not allowed field(s): {", ".join(forbidden_fields)}'}), 400
+        return jsonify({'error': f'Not allowed field(s): {", ".join(forbidden_fields)}.'}), 400
     db_user = current_app.data_manager.add_user(
         {'username': username,
         'password': password,
@@ -58,7 +59,7 @@ def read_users():
 def update_user(user_id: int):
     data = request.get_json()
     if not any(['username' in data, 'password' in data, 'role' in data]):
-        return jsonify({'error': 'None of the fields was provided ("username", "password", "role")'}), 400
+        return jsonify({'error': 'None of the fields was provided ("username", "password", "role").'}), 400
     wrong_fields = set(data.keys()).difference({'username', 'password', 'role'})
     if wrong_fields:
         return jsonify({'error': f'Not allowed field(s): {", ".join(wrong_fields)}.'}), 400

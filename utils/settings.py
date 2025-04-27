@@ -9,12 +9,12 @@ db = SQLAlchemy(model_class=Base)
 use_sql_database = True
 
 
-skip_tests = dict(crud_json=True,
-        crud_sql=True,
-        integration=True,
-        authentication=True,
-        routes_json=True,
+skip_tests = dict(crud_json=False,
+        crud_sql=False,
+        integration=False,
+        authentication=False,
+        routes_json=False,
         routes_sql=False,
-        models=True
+        models=False
         )
 
