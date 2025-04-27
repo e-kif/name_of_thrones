@@ -2,8 +2,10 @@ import pytest
 from data.json_data_manager import JSONDataManager as json_db
 from data.data_manager import DataManager
 import abc
+from utils.settings import skip_tests
 
 
+@pytest.mark.skipif(skip_tests['integration'], reason='Skipped by config')
 def test_data_manager_abstract_method():
     DataManager.__abstractmethods__ = set()
     assert isinstance(DataManager, abc.ABCMeta)
@@ -18,6 +20,7 @@ def test_data_manager_abstract_method():
     assert Dummy().update_character(1, {'name': 'Bilbo Beggins'}) is None
 
 
+@pytest.mark.skipif(skip_tests['integration'], reason='Skipped by config')
 def test_json_db_integration():
     assert json_db().__getattribute__('__init__'), 'Constructor method is missing'
     assert json_db().__getattribute__('load_json_file'), 'Load json method is missing'
@@ -30,6 +33,7 @@ def test_json_db_integration():
         assert json_db('some_file.json'), 'Non existent file does not raise an exception'
 
 
+@pytest.mark.skipif(skip_tests['integration'], reason='Skipped by config')
 def test_main_app_run(monkeypatch):
     called = {}
 

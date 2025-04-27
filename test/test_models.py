@@ -1,7 +1,10 @@
+import pytest
 from models.users import *
 from models.characters import *
+from utils.settings import skip_tests
 
 
+@pytest.mark.skipif(skip_tests['models'], reason='Skipped by config')
 def test_user_model(sql_db):
     role = Roles(name='Receptionist')
     sql_db.session.add(role)
@@ -16,6 +19,7 @@ def test_user_model(sql_db):
     assert user.dict == {'username': 'Pam', 'id': 1, 'role': 'Receptionist'}
     
 
+@pytest.mark.skipif(skip_tests['models'], reason='Skipped by config')
 def test_user_role_setter_str(sql_db):
     user = Users(username='Jim', password='12345'.encode('utf8'))
     user.role = 'Salesman'
@@ -25,6 +29,7 @@ def test_user_role_setter_str(sql_db):
     assert user.role == 'Salesman'
 
 
+@pytest.mark.skipif(skip_tests['models'], reason='Skipped by config')
 def test_user_role_setter_obj(sql_db):
     role = Roles(name='Regional Manager')
     sql_db.session.add(role)
@@ -38,6 +43,7 @@ def test_user_role_setter_obj(sql_db):
     assert user.role == 'Regional Manager'
 
 
+@pytest.mark.skipif(skip_tests['models'], reason='Skipped by config')
 def test_user_role_setter_existing_obj(sql_db):
     assistant_regional_manager = Roles(name='Assistant Regional Manager')
     sql_db.session.add(assistant_regional_manager)
@@ -58,6 +64,7 @@ def test_user_role_setter_existing_obj(sql_db):
     assert repr(dwight) == '1. Dwight (Assistant Regional Manager)'
 
 
+@pytest.mark.skipif(skip_tests['models'], reason='Skipped by config')
 def test_character_model(sql_db):
     jon = Characters(
             name='Jon Snow',

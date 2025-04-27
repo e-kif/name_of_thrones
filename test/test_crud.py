@@ -1,8 +1,9 @@
 import pytest
 from data.json_data_manager import JSONDataManager as json_data_manager
+from utils.settings import skip_tests
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
 def test_json_read_operations(json_db):
     assert isinstance(json_db.read_characters()[0], list), 'Wrong data storage type'
     assert len(json_db.read_characters()[0]) == 20, 'Wrong characters count without set limit'
@@ -15,7 +16,7 @@ def test_json_read_operations(json_db):
         json_data_manager('wrong_file.json')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
 def test_json_read_characters_filters(json_db):
     assert all([character['house'] == None for character in json_db.read_characters(filter={'house': None})[0]]), 'Filter by house = None'
     assert all([character['house'] == 'Stark' for character in json_db.read_characters(filter={'house': 'Stark'})[0]]), 'Filter by house = Stark'
@@ -28,7 +29,7 @@ def test_json_read_characters_filters(json_db):
     assert len(json_db.read_characters(filter={'age_more_than': 50, 'age_less_then': 55})[0]) == 3
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
 def test_json_read_characters_sorting(json_db, jon_snow, daenerys, olenna_tyrell):
     assert json_db.read_characters(sorting='id')[0][0] == jon_snow
     assert json_db.read_characters(sorting='id', order='sort_asc')[0][0] == jon_snow
@@ -40,7 +41,7 @@ def test_json_read_characters_sorting(json_db, jon_snow, daenerys, olenna_tyrell
         json_db.read_characters(sorting='family')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
 def test_json_create_operation(json_db, robert_baratheon):
     robert_db = json_db.add_character(robert_baratheon)[0]
     assert len(json_db) == 51, 'Character was not added'
@@ -54,7 +55,7 @@ def test_json_create_operation(json_db, robert_baratheon):
         json_db.add_character({'role': 'Nameless person', 'strength': 'Stealth'})
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
 def test_json_delete_operation(json_db, jon_snow):
     assert isinstance(json_db.remove_character(2)[0], dict), 'Remove method returns wrong data type'
     assert len(json_db) == 49, 'Remove method did not reduce amount of characters'
@@ -67,7 +68,7 @@ def test_json_delete_operation(json_db, jon_snow):
         json_db.remove_character('1')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
 def test_json_update_operation(json_db, jon_snow, olenna_tyrell):
     assert json_db.update_character(1, {'name': 'Gendalf'})[0]['name'] == 'Gendalf', 'Function returns not updated field'
     jon_snow.update({'name': 'Gendalf'})
@@ -80,7 +81,7 @@ def test_json_update_operation(json_db, jon_snow, olenna_tyrell):
         json_db.update_character(11, {'name': olenna_tyrell['name']}), 'Update character name to already existing character name'
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
 def test_sql_read_operation(sql_db, jon_snow, daenerys, olenna_tyrell):
     sql_db._reset_database()
     assert len(sql_db.read_characters()[0]) == 20
@@ -97,7 +98,7 @@ def test_sql_read_operation(sql_db, jon_snow, daenerys, olenna_tyrell):
     assert set(sql_db.read_character(1)[0].keys()) == {'id', 'name', 'house', 'animal', 'symbol', 'nickname', 'role', 'age', 'death', 'strength'}, 'Not all character keys were retrieved'
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_read_characters_filters(sql_db):
     sql_db._reset_database()
     assert all([character['house'] == None for character in sql_db.read_characters(filter={'house': None})[0]]), 'Filter by house = None'
@@ -112,7 +113,7 @@ def test_sql_read_characters_filters(sql_db):
     assert len(sql_db.read_characters(filter={'age_more_than': 50, 'age_less_then': 55})[0]) == 3
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_read_characters_sorting(sql_db, jon_snow, daenerys, olenna_tyrell):
     sql_db._reset_database()
     assert sql_db.read_characters(sorting='id')[0][0] == jon_snow
@@ -125,7 +126,7 @@ def test_sql_read_characters_sorting(sql_db, jon_snow, daenerys, olenna_tyrell):
         sql_db.read_characters(sorting='family')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_create_operation(sql_db, robert_baratheon):
     sql_db._reset_database()
     robert_db = sql_db.add_character(robert_baratheon)[0]
@@ -141,7 +142,7 @@ def test_sql_create_operation(sql_db, robert_baratheon):
         sql_db.add_character(robert_baratheon)
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_delete_operation(sql_db, jon_snow):
     sql_db._reset_database()
     assert isinstance(sql_db.remove_character(2), tuple), 'Remove method returns wrong data type'
@@ -156,7 +157,7 @@ def test_sql_delete_operation(sql_db, jon_snow):
         sql_db.remove_character('1')
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_update_operation(sql_db, jon_snow, olenna_tyrell):
     sql_db._reset_database()
     assert sql_db.update_character(1, {'name': 'Gendalf'})[0]['name'] == 'Gendalf', 'Function returns not updated field'
@@ -170,7 +171,7 @@ def test_sql_update_operation(sql_db, jon_snow, olenna_tyrell):
         sql_db.update_character(22, {'name': olenna_tyrell['name']}), 'Update with not allowed field'
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_user_creation(sql_db):
     assert sql_db.add_user({'username': 'no-password', 'role': 'careless'})[1] == 400, 'Wrong status code for incorrect add user request'
     assert sql_db.add_user({'username': 'no-password', 'role': 'careless'})[0] == {'error': 'Missing required field(s): password.'}, 'Wrong message for incorrect add user request'
@@ -181,7 +182,7 @@ def test_sql_user_creation(sql_db):
     assert sql_db.add_user({'username': 'user', 'password': '12345', 'role': 'careless'}) == ({'error': 'User user already exists.'}, 409)
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_read_users(sql_db):
     assert sql_db.read_user(1) == ({'error': 'User with id=1 was not found.'}, 404), 'Wrong return on user not found'
     sql_db.add_user({'username': 'user', 'password': '12345', 'role': 'careless'})
@@ -192,7 +193,7 @@ def test_sql_read_users(sql_db):
     assert users == ([{'username': 'user', 'role': 'careless', 'id': 1}], 200), 'Wrong return on read_users method'
     
     
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_update_user(sql_db):
     sql_db._reset_users()
     assert sql_db.update_user(1, {'eye color': 'green'}) == ({'error': 'Not allowed field(s): eye color.'}, 400), 'Wrong return on user update with wrong field'
@@ -201,7 +202,7 @@ def test_sql_update_user(sql_db):
     assert sql_db.update_user(3, {'username': 'Michael'}) == ({'error': 'User with name Michael already exists.'}, 409), 'Wrong return on update user name to existing user'
 
 
-# @pytest.mark.skip()
+@pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_delete_user(sql_db):
     sql_db._reset_users()
     total_users = len(sql_db.read_users()[0])
