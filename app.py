@@ -1,10 +1,12 @@
 import os
 from flask import Flask, g
+from flasgger import Swagger
 from dotenv import load_dotenv
 from routers import database_bp, characters_bp, errorhandlers_bp, authentication_bp, users_bp
 from data.json_data_manager import JSONDataManager
 from data.sql_data_manager import SQLDataManager
 from utils.settings import db, use_sql_database
+from utils.docs import swagger_template
 
 
 def create_app(db_path: str = None, use_sql: bool = False):
@@ -40,10 +42,11 @@ def create_app(db_path: str = None, use_sql: bool = False):
 def main():
     """Main function that starts the app"""
     app = create_app(use_sql=use_sql_database)
+    swagger = Swagger(app, template=swagger_template)
     app.run(debug=True)
 
 
-if __name__ == '__main__':  # pragma: no cover
+if __name__ == '__main__':
     main()  # pragma: no cover
 
     # todo swagger docs
