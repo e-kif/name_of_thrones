@@ -42,16 +42,14 @@ def create_app(db_path: str = None, use_sql: bool = False):
 def main():
     """Main function that starts the app"""
     app = create_app(use_sql=use_sql_database)
-    swagger = Swagger(app, template=swagger_template)
+    Swagger(app, template=swagger_template)
     app.run(debug=True)
 
 
 if __name__ == '__main__':
     main()  # pragma: no cover
 
-    # todo swagger docs
     # todo pydantic schemas
-    # todo test coverage
     # todo update requirements
     # todo update readme
     # todo deploy

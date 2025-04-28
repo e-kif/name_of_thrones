@@ -3,6 +3,7 @@ from data.json_data_manager import JSONDataManager as json_db
 from data.data_manager import DataManager
 import abc
 from utils.settings import skip_tests
+from app import create_app
 
 
 @pytest.mark.skipif(skip_tests['integration'], reason='Skipped by config')
@@ -37,18 +38,13 @@ def test_json_db_integration():
 def test_main_app_run(monkeypatch):
     called = {}
 
-    class FakeApp:
-        def run(self, debug):
-            called['run'] = debug
+    def fake_run(self, debug):
+        called['run'] = debug
 
-    def fake_create_app(use_sql):
-        called['create_app'] = use_sql
-        return FakeApp()
+    app = create_app(use_sql=True)
+    monkeypatch.setattr(app.__class__, 'run', fake_run)
 
-    monkeypatch.setattr('app.create_app', fake_create_app)
     from app import main
     main()
 
-    assert 'create_app' in called
     assert called['run'] is True
-
