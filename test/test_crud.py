@@ -8,7 +8,7 @@ def test_json_read_operations(json_db):
     assert isinstance(json_db.read_characters()[0], list), 'Wrong data storage type'
     assert len(json_db.read_characters()[0]) == 20, 'Wrong characters count without set limit'
     assert json_db.read_characters() != json_db.read_characters(), 'Characters not random'
-    assert isinstance(json_db.read_character(1), tuple), 'Worng object type for read_character'
+    assert isinstance(json_db.read_character(1), tuple), 'Wrong object type for read_character'
     with pytest.raises(KeyError):
         assert json_db.read_character(101), 'Key error was not raised for character_id > len(characters)'
     assert set(json_db.read_character(1)[0].keys()) == {'id', 'name', 'house', 'animal', 'symbol', 'nickname', 'role', 'age', 'death', 'strength'}, 'Not all character keys were retrieved'
@@ -18,15 +18,15 @@ def test_json_read_operations(json_db):
 
 @pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
 def test_json_read_characters_filters(json_db):
-    assert all([character['house'] == None for character in json_db.read_characters(filter={'house': None})[0]]), 'Filter by house = None'
-    assert all([character['house'] == 'Stark' for character in json_db.read_characters(filter={'house': 'Stark'})[0]]), 'Filter by house = Stark'
-    assert all([character['house'] == 'Stark' for character in json_db.read_characters(filter={'house': 'stARk'})[0]]), 'Filter by house = stARk'
-    assert all([character['house'] == 'Stark' for character in json_db.read_characters(filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = stARk'
-    assert all([character['house'] == 'Stark' for character in json_db.read_characters(filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = tARk'
+    assert all([character['house'] == None for character in json_db.read_characters(char_filter={'house': None})[0]]), 'Filter by house = None'
+    assert all([character['house'] == 'Stark' for character in json_db.read_characters(char_filter={'house': 'Stark'})[0]]), 'Filter by house = Stark'
+    assert all([character['house'] == 'Stark' for character in json_db.read_characters(char_filter={'house': 'stARk'})[0]]), 'Filter by house = stARk'
+    assert all([character['house'] == 'Stark' for character in json_db.read_characters(char_filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = stARk'
+    assert all([character['house'] == 'Stark' for character in json_db.read_characters(char_filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = tARk'
     with pytest.raises(ValueError):
-        json_db.read_characters(filter={'planet': 'earth'})
-    assert len(json_db.read_characters(filter={'age_more_than': 50})[0]) == 8
-    assert len(json_db.read_characters(filter={'age_more_than': 50, 'age_less_then': 55})[0]) == 3
+        json_db.read_characters(char_filter={'planet': 'earth'})
+    assert len(json_db.read_characters(char_filter={'age_more_than': 50})[0]) == 8
+    assert len(json_db.read_characters(char_filter={'age_more_than': 50, 'age_less_then': 55})[0]) == 3
 
 
 @pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
@@ -101,16 +101,16 @@ def test_sql_read_operation(sql_db, jon_snow, daenerys, olenna_tyrell):
 @pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
 def test_sql_read_characters_filters(sql_db):
     sql_db._reset_database()
-    assert all([character['house'] == None for character in sql_db.read_characters(filter={'house': None})[0]]), 'Filter by house = None'
-    assert all([character['house'] == 'Stark' for character in sql_db.read_characters(filter={'house': 'Stark'})[0]]), 'Filter by house = Stark'
-    assert all([character['house'] == 'Stark' for character in sql_db.read_characters(filter={'house': 'stARk'})[0]]), 'Filter by house = stARk'
-    assert all([character['house'] == 'Stark' for character in sql_db.read_characters(filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = stARk'
-    assert all([character['house'] == 'Stark' for character in sql_db.read_characters(filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = tARk'
-    assert all([character['symbol'] == None for character in sql_db.read_characters(filter={'sYmbOl': '   '})[0]]), 'Filter by Symbol = None'
+    assert all([character['house'] is None for character in sql_db.read_characters(char_filter={'house': None})[0]]), 'Filter by house = None'
+    assert all([character['house'] == 'Stark' for character in sql_db.read_characters(char_filter={'house': 'Stark'})[0]]), 'Filter by house = Stark'
+    assert all([character['house'] == 'Stark' for character in sql_db.read_characters(char_filter={'house': 'stARk'})[0]]), 'Filter by house = stARk'
+    assert all([character['house'] == 'Stark' for character in sql_db.read_characters(char_filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = stARk'
+    assert all([character['house'] == 'Stark' for character in sql_db.read_characters(char_filter={'hoUSe': 'stARk'})[0]]), 'Filter by hoUSe = tARk'
+    assert all([character['symbol'] is None for character in sql_db.read_characters(char_filter={'sYmbOl': '   '})[0]]), 'Filter by Symbol = None'
     with pytest.raises(ValueError):
-        sql_db.read_characters(filter={'planet': 'earth'})
-    assert len(sql_db.read_characters(filter={'age_more_than': 50})[0]) == 8
-    assert len(sql_db.read_characters(filter={'age_more_than': 50, 'age_less_then': 55})[0]) == 3
+        sql_db.read_characters(char_filter={'planet': 'earth'})
+    assert len(sql_db.read_characters(char_filter={'age_more_than': 50})[0]) == 8
+    assert len(sql_db.read_characters(char_filter={'age_more_than': 50, 'age_less_then': 55})[0]) == 3
 
 
 @pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
@@ -169,6 +169,8 @@ def test_sql_update_operation(sql_db, jon_snow, olenna_tyrell):
         sql_db.update_character(5, {'hair': None}), 'Update with not allowed field'
     with pytest.raises(AttributeError):
         sql_db.update_character(22, {'name': olenna_tyrell['name']}), 'Update with not allowed field'
+    with pytest.raises(TypeError):
+        sql_db.update_character('one', {'name': 'the_first'}), 'Update character with str for id'
 
 
 @pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')

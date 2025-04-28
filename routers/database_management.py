@@ -6,5 +6,5 @@ database_bp = Blueprint('database', __name__)
 @database_bp.route('/reset', methods=['GET'])
 def reset_database():
     """Resets whole database to predefined by json files characters and users"""
-    current_app.data.manager._reset_database()
+    current_app.data_manager._reset_database()
     return jsonify({'message': 'Database was reset successfully.'}), 200

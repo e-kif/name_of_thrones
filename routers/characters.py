@@ -38,7 +38,7 @@ def get_characters():
         return jsonify({'error': 'Limit and skip parameters should be integers.'}), 400
     try:
         characters = db().read_characters(limit=limit, skip=skip,
-                                          filter=char_filter,
+                                          char_filter=char_filter,
                                           sorting=sorting, order=order)
     except IndexError:
         return jsonify({'error': 'There are no results for given limit and skip parameters.'}), 404

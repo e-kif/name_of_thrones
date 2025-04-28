@@ -3,7 +3,6 @@ import pytest
 import tempfile
 import json
 from app import create_app
-from data.json_data_manager import JSONDataManager as json_data_manager
 from utils.security import is_user_credentials_valid
 
 
@@ -133,10 +132,10 @@ def robert_baratheon():
             'death': 1,
             'strength': 'Immense physical strength'}
 
+
 @pytest.fixture()
 def aemon():
     return {'name': 'Aemon Targaryen',
             'age': 102,
             'role': 'Maester of the Night\'s Watch',
             'strength': 'Wisdom and loyalty'}
-

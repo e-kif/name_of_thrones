@@ -74,11 +74,11 @@ def test_character_model(sql_db):
     sql_db.session.add(jon)
     sql_db.session.flush()
 
-    jon.house='Stark'
-    jon.age=25
-    jon.animal='Direwolf'
-    jon.symbol='Wolf'
-    jon.nickname='King in the North'
+    jon.house = 'Stark'
+    jon.age = 25
+    jon.animal = 'Direwolf'
+    jon.symbol = 'Wolf'
+    jon.nickname = 'King in the North'
     assert repr(jon) == '1. Jon Snow (age 25, death None, house Stark)'
     assert jon.dict == {
             'id': 1,
@@ -111,8 +111,8 @@ def test_character_model(sql_db):
     assert jon.symbol == 'Dragon'
     jon.animal = None    
     jon.age = None    
-    assert jon.dict['animal'] == None 
-    assert jon.dict['age'] == None 
+    assert jon.dict['animal'] is None
+    assert jon.dict['age'] is None
     
     dany.age = 24
     assert dany.dict['age'] == 24
@@ -120,4 +120,3 @@ def test_character_model(sql_db):
     user1 = sql_db.session.query(Characters).filter(Characters.death == None).first()
     user2 = sql_db.session.query(Characters).filter(Characters.house == 'Stark').first()
     assert user1 == user2 == jon
-

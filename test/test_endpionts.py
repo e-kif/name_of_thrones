@@ -94,7 +94,9 @@ def test_create_character_json(json_client, daenerys, robert_baratheon, aemon, h
     assert create_aemon_strengthless.status_code == 400, 'Character creation with empty strength field returns wrong status code'
     assert create_aemon_strengthless.json == {'error': 'Character\'s strength can not be empty.'}, 'Wrong error message on empty strength'
 
-    aemon_nameless.pop('name'); aemon_roleless.pop('role'); aemon_strengthless.pop('strength')
+    aemon_nameless.pop('name')
+    aemon_roleless.pop('role')
+    aemon_strengthless.pop('strength')
     create_aemon_nameless = json_client.post('/characters', json=aemon_nameless, headers=headers_json, follow_redirects=True)
     create_aemon_roleless = json_client.post('/characters', json=aemon_roleless, headers=headers_json, follow_redirects=True)
     create_aemon_strengthless = json_client.post('/characters', json=aemon_strengthless, headers=headers_json, follow_redirects=True)
@@ -140,7 +142,6 @@ def test_update_character_json(json_client, jon_snow, daenerys, olenna_tyrell, h
     id_update = json_client.put('/characters/23', json={'id': 12, 'name': 'Helly R'}, headers=headers_json)
     assert id_update.status_code == 400, 'ID update is prohibited'
     assert id_update.json == {'error': 'Updating ID field is not allowed.'}, 'Wrong message for id update error'
-
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
@@ -239,7 +240,9 @@ def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon, hea
     assert create_aemon_strengthless.status_code == 400, 'Character creation with empty strength field returns wrong status code'
     assert create_aemon_strengthless.json == {'error': 'Character\'s strength can not be empty.'}, 'Wrong error message on empty strength'
 
-    aemon_nameless.pop('name'); aemon_roleless.pop('role'); aemon_strengthless.pop('strength')
+    aemon_nameless.pop('name')
+    aemon_roleless.pop('role')
+    aemon_strengthless.pop('strength')
     create_aemon_nameless = sql_client.post('/characters', json=aemon_nameless, headers=headers_sql, follow_redirects=True)
     create_aemon_roleless = sql_client.post('/characters', json=aemon_roleless, headers=headers_sql, follow_redirects=True)
     create_aemon_strengthless = sql_client.post('/characters', json=aemon_strengthless, headers=headers_sql, follow_redirects=True)
@@ -282,7 +285,7 @@ def test_update_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell, hea
     assert jon_gendalf.json['name'] == 'Gendalf', 'Field was not updated'
     assert jon_gendalf.status_code == 200, 'Wrong response status code'
     wrong_character = sql_client.put('/characters/52', json={'age': 120}, headers=headers_sql)
-    assert wrong_character.status_code == 400, 'Update for non existing character wrong status code'
+    assert wrong_character.status_code == 404, 'Update for non existing character wrong status code'
     assert wrong_character.json == {'error': 'Character with id=52 was not found.'}, 'Wrong message for 400 error'
     id_update = sql_client.put('/characters/23', json={'id': 12, 'name': 'Helly R'}, headers=headers_sql)
     assert id_update.status_code == 400, 'ID update is prohibited'
@@ -301,10 +304,10 @@ def test_crash_endpoint(sql_app, sql_client):
 def test_create_user(sql_client):
     missing_username = sql_client.post('/users/', json={'password': 'der_password'})
     missing_password = sql_client.post('/users/', json={'username': 'Gendalf'})
-    assert missing_username.status_code == 400, 'Worng status code for missing username'
-    assert missing_password.status_code == 400, 'Worng status code for missing password'
-    assert missing_username.json == {'error': 'Missing required field(s): username.'}, 'Worng message for missing username'
-    assert missing_password.json == {'error': 'Missing required field(s): password.'}, 'Worng message for missing password'
+    assert missing_username.status_code == 400, 'Wrong status code for missing username'
+    assert missing_password.status_code == 400, 'Wrong status code for missing password'
+    assert missing_username.json == {'error': 'Missing required field(s): username.'}, 'Wrong message for missing username'
+    assert missing_password.json == {'error': 'Missing required field(s): password.'}, 'Wrong message for missing password'
     empty_username = sql_client.post('/users/', json={'username': '    ', 'password': 'der_password'})
     assert empty_username.status_code == 400, 'Wrong status code for empty username'
     assert empty_username.json == {'error': 'Username can not be empty.'}, 'Wrong message for empty username'
@@ -314,7 +317,7 @@ def test_create_user(sql_client):
     correct_user = sql_client.post('/users/', json={'username': 'Gendalf', 'password': 'der_password', 'role': 'wizard'})
     assert correct_user.status_code == 201, 'Wrong status code on correct user creation'
     assert correct_user.json == {'username': 'Gendalf', 'role': 'wizard', 'id': 1}, 'Wrong user response on correct request'
-    user_no_role = sql_client.post('/users/', json={'username': 'Frodo', 'password': 'Baggins'})
+    # user_no_role = sql_client.post('/users/', json={'username': 'Frodo', 'password': 'Baggins'})
     # assert user_no_role.json == {'username': 'Frodo', 'id': 2}
 
 
@@ -365,5 +368,3 @@ def test_update_user(sql_client, sql_db):
     token2 = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scottish'}).json['token']
     check_token2 = sql_client.delete('/characters/3', headers={'Authorization': f'Bearer {token2}'})
     assert check_token2.status_code == 404
-
-

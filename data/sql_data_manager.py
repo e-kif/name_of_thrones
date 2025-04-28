@@ -1,5 +1,6 @@
 from sqlalchemy import exc, desc
 from sqlalchemy.sql import func
+from flask_sqlalchemy import SQLAlchemy
 from data.data_manager import DataManager
 from models.characters import *
 from models.users import Users, Roles

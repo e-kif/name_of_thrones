@@ -29,8 +29,6 @@ def token_required(endpoint_function):
             return jsonify({'error': 'Token has expired.'}), 401
         except jwt.InvalidTokenError:
             return jsonify({'error': 'Token is invalid.'}), 401
-        except KeyError as error:
-            return jsonify({'error': error.args[0]}), 404
 
         return endpoint_function(*args, **kwargs)
 
