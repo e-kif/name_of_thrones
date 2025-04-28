@@ -1,15 +1,10 @@
-from flask import Blueprint, jsonify, request, current_app
-
+from flask import Blueprint, jsonify, current_app
 
 database_bp = Blueprint('database', __name__)
 
 
-def db():
-    """Helper function that returns current app's data manager"""
-    return current_app.data_manager
-
-
 @database_bp.route('/reset', methods=['GET'])
 def reset_database():
-    db()._reset_database()
-    return jsonify({'message': 'Database was reset successfuly.'}), 200
+    """Resets whole database to predefined by json files characters and users"""
+    current_app.data.manager._reset_database()
+    return jsonify({'message': 'Database was reset successfully.'}), 200

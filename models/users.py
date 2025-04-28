@@ -1,18 +1,12 @@
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import Mapped, mapped_column, object_session
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import exc, LargeBinary
 from utils.settings import db
 
 
-#user_roles = db.Table(
-#    'user_roles',
-#    db.Column('user_id', db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
-#    db.Column('role_id', db.Integer, db.ForeignKey('roles.id', ondelete='CASCADE')),
-#    db.UniqueConstraint('user_id', name='unique_user_constraint')
-#     )
-
 class Users(db.Model):
+    """Database Users class"""
+
     req_fields = {'username', 'password'}
     opt_fields = {'role'}
     allowed_fields = req_fields.union(opt_fields)
@@ -22,14 +16,16 @@ class Users(db.Model):
     password: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     role_id: Mapped[str] = mapped_column(db.ForeignKey('roles.id', ondelete='CASCADE'), nullable=False)
 
-    roles: Mapped['Roles'] = db.relationship('Roles', uselist=False, back_populates='users') 
+    roles: Mapped['Roles'] = db.relationship('Roles', uselist=False, back_populates='users')
 
     @hybrid_property
     def role(self):
-       return self.roles.name 
-    
+        """User role hybrid property getter"""
+        return self.roles.name
+
     @role.setter
     def role(self, role: str):
+        """User role hybrid property setter"""
         if isinstance(role, Roles):
             self.role_id = role.id
         else:
@@ -46,6 +42,7 @@ class Users(db.Model):
 
     @property
     def dict(self):
+        """User serialization dict property getter"""
         return {'id': self.id,
                 'username': self.username,
                 'role': self.role}
@@ -55,6 +52,8 @@ class Users(db.Model):
 
 
 class Roles(db.Model):
+    """Database Roles class"""
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
 

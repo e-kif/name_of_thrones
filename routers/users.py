@@ -1,13 +1,15 @@
 from flask import Blueprint, jsonify, request, current_app
 from utils.security import is_user_credentials_valid, generate_access_token, hash_password
 
-
 users_bp = Blueprint('users', __name__)
 authentication_bp = Blueprint('auth', __name__)
 
 
 @authentication_bp.route('/login', methods=['POST'])
 def login():
+    """Checks for provided login data in payload. If valid returns token with success status code.
+    If invalid - error message with error status code (400 or 401).
+    """
     data = request.get_json()
     if any([not data, 'username' not in data, 'password' not in data]):
         return jsonify({'error': 'Missing username or password'}), 400
@@ -15,10 +17,13 @@ def login():
     if not is_user_credentials_valid(username, password):
         return jsonify({'error': 'Invalid username or password'}), 401
     return generate_access_token(username), 200
-   
+
 
 @users_bp.route('/', methods=['POST'])
 def create_user():
+    """Checks provided payload. If valid - creates a new user, returns user data
+    (except the password). If invalid - error message with corresponding status code.
+    """
     data = request.get_json()
     missing_fields = {'username', 'password'}.difference(set(data.keys()))
     if missing_fields:
@@ -32,31 +37,41 @@ def create_user():
         return jsonify({'error': f'Not allowed field(s): {", ".join(forbidden_fields)}.'}), 400
     db_user = current_app.data_manager.add_user(
         {'username': username,
-        'password': password,
-        'role': role})
+         'password': password,
+         'role': role})
     return jsonify(db_user[0]), db_user[1]
 
 
 @users_bp.route('/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id: int):
-    delete_user = current_app.data_manager.delete_user(user_id)
-    return jsonify(delete_user[0]), delete_user[1]
+    """Deletes a user found by user_id. Returns deleted user info with success status code.
+    If user not found - returns error message with 404 status code.
+    """
+    del_user = current_app.data_manager.delete_user(user_id)
+    return jsonify(del_user[0]), del_user[1]
 
 
 @users_bp.route('/<int:user_id>', methods=['GET'])
 def read_user(user_id: int):
+    """Returns user info for a user with a given id. If user not found -
+    error message with 404 status code.
+    """
     db_user = current_app.data_manager.read_user(user_id)
     return jsonify(db_user[0]), db_user[1]
 
 
 @users_bp.route('/', methods=['GET'])
 def read_users():
+    """Returns a list of registered users (if any) or empty list with 404 status code."""
     db_users = current_app.data_manager.read_users()
     return jsonify(db_users[0]), db_users[1]
 
 
 @users_bp.route('/<int:user_id>', methods=['PUT'])
 def update_user(user_id: int):
+    """Validates payload. If valid updates and returns user info found by a given user_id.
+    If a user not found or payload is invalid - error message with error status code.
+    """
     data = request.get_json()
     if not any(['username' in data, 'password' in data, 'role' in data]):
         return jsonify({'error': 'None of the fields was provided ("username", "password", "role").'}), 400
@@ -67,4 +82,3 @@ def update_user(user_id: int):
         data['password'] = hash_password(data['password'])
     updated_user = current_app.data_manager.update_user(user_id, data)
     return jsonify(updated_user[0]), updated_user[1]
-

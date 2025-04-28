@@ -29,7 +29,7 @@ def get_character_keys() -> set:
 def filter_characters(filter_key: str,
                       filter_value: str | None) -> list | None:
     """Filters characters based on the filter_value of filter_key.
-    Both parameters are case insensitive.
+    Both parameters are case-insensitive.
     """
     filter_key = filter_key.lower()
     if filter_key.lower() in get_character_keys():
