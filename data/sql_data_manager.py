@@ -26,7 +26,8 @@ class SQLDataManager(DataManager):
 
     def _reset_users(self):
         json_users = JSONDataManager().users
-        [(table.__table__.drop(self.db.engine), table.__table__.create(self.db.engine)) for table in {Users, Roles}]
+        [table.__table__.drop(self.db.engine, checkfirst=True) for table in [Users, Roles]]
+        [table.__table__.create(self.db.engine, checkfirst=True) for table in [Roles, Users]]
         for user in json_users:
             del user['id']
             user['password'] = hash_password(user['password'])
