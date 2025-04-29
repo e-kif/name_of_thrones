@@ -1,5 +1,6 @@
 import pytest
 from utils.settings import skip_tests
+from utils.security import generate_access_token
 
 
 @pytest.mark.skipif(skip_tests['authentication'], reason='Skipped by config')
@@ -14,7 +15,8 @@ def test_is_user_credentials_valid_json(validate_user_json):
 
 @pytest.mark.skipif(skip_tests['authentication'], reason='Skipped by config')
 def test_token_generation_sql(sql_client, sql_db):
-    sql_client.get('/database/reset')
+    sql_db._reset_database()
+    # sql_client.get('/database/reset', headers={})
     with pytest.raises(Exception):
         sql_client.post('/login', json={'username': 'micha', 'password': 'whatever'})
     missing_user = sql_client.post('/login', json={'password': 'qwerty'})
@@ -41,12 +43,12 @@ def test_sql_protected_endpoints(sql_client, headers_sql, robert_baratheon):
     non_auth = sql_client.post('/characters/')
     assert non_auth.status_code == 401, 'Wrong status code for protected endpoint'
     assert non_auth.json == {'error': 'Authentication failed: no token provided.'}
-    ghost_id = sql_client.post('/users/', json={'username': 'tmp', 'password': 't', 'role': 'Ghost'}).json['id']
+    sql_client.post('/users/', json={'username': 'tmp', 'password': 't', 'role': 'ghost'})
     ghost_token = sql_client.post('/login', json={'username': 'tmp', 'password': 't'}).json['token']
-    sql_client.delete(f'/users/{ghost_id}')
+    sql_client.delete(f'/users/me', headers={'Authorization': f'Bearer {ghost_token}'})
     with pytest.raises(KeyError):
         sql_client.post('/characters/', json=robert_baratheon, headers={'Authorization': f'Bearer {ghost_token}'})
-    expired_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlBhbSIsInJvbGUiOiJSZWNlcHRpb25pc3QiLCJleHAiOjE3NDU0MTIwNzh9.LuZeRxWouTQ8w-S1SfKZDufCFD1Qu0rmr9ZAFXntxR4"
+    expired_token = generate_access_token('Michael', 0.000001).json['token']
     expired = sql_client.post('/characters/', headers={'Authorization': f'Bearer {expired_token}'})
     assert expired.status_code == 401
     assert expired.json == {'error': 'Token has expired.'}
