@@ -145,8 +145,8 @@ def test_update_character_json(json_client, jon_snow, daenerys, olenna_tyrell, h
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
-def test_read_characters_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
-    sql_client.get('/database/reset')
+def test_read_characters_sql(sql_db, sql_client, jon_snow, daenerys, olenna_tyrell):
+    sql_db._reset_database()
     random20 = sql_client.get('/characters', follow_redirects=True)
     assert random20.status_code == 200, 'Endpoint returns wrong status code'
     assert len(random20.json) == 20, 'Wrong character cont for empty limit and skip parameters'
@@ -184,8 +184,8 @@ def test_read_characters_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
-def test_read_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
-    sql_client.get('/database/reset')
+def test_read_character_sql(sql_db, sql_client, jon_snow, daenerys, olenna_tyrell):
+    sql_db._reset_database()
     jon = sql_client.get('/characters/1')
     dany = sql_client.get('/characters/2')
     olenna = sql_client.get('/characters/50')
@@ -203,8 +203,8 @@ def test_read_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell):
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
-def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon, headers_sql):
-    sql_client.get('/database/reset')
+def test_create_character_sql(sql_db, sql_client, daenerys, robert_baratheon, aemon, headers_sql):
+    sql_db._reset_database()
     robert = sql_client.post('/characters', json=robert_baratheon, headers=headers_sql, follow_redirects=True)
     print(f'{headers_sql=}')
     assert robert.status_code == 201, 'Wrong status code for character creation'
@@ -260,8 +260,8 @@ def test_create_character_sql(sql_client, daenerys, robert_baratheon, aemon, hea
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
-def test_delete_character_sql(sql_client, jon_snow, headers_sql):
-    sql_client.get('/database/reset')
+def test_delete_character_sql(sql_db, sql_client, jon_snow, headers_sql):
+    sql_db._reset_database()
     jon = sql_client.delete('/characters/1', headers=headers_sql)
     assert jon.status_code == 200
     assert jon.json == jon_snow
@@ -279,8 +279,8 @@ def test_delete_character_sql(sql_client, jon_snow, headers_sql):
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
-def test_update_character_sql(sql_client, jon_snow, daenerys, olenna_tyrell, headers_sql):
-    sql_client.get('/database/reset')
+def test_update_character_sql(sql_db, sql_client, jon_snow, daenerys, olenna_tyrell, headers_sql):
+    sql_db._reset_database()
     jon_gendalf = sql_client.put('/characters/1', json={'name': 'Gendalf'}, headers=headers_sql)
     assert jon_gendalf.json['name'] == 'Gendalf', 'Field was not updated'
     assert jon_gendalf.status_code == 200, 'Wrong response status code'
@@ -322,49 +322,49 @@ def test_create_user(sql_client):
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
-def test_delete_user(sql_client, sql_db):
+def test_delete_user(sql_client, sql_db, headers_sql):
     sql_db._reset_users()
-    user_count = len(sql_client.get('/users/').json)
-    user_2 = sql_client.delete('/users/2')
+    user_count = len(sql_client.get('/users/', headers=headers_sql).json)
+    user_2 = sql_client.delete('/users/2', headers=headers_sql)
     assert user_2.status_code == 200, 'Wrong status code on user delete'
     assert user_2.json == {'username': 'Jim', 'role': 'Salesman', 'id': 2}, 'Wrong response for user delete'
-    assert len(sql_client.get('/users/').json) == user_count - 1, 'User count was not reduced after user deletion'
-    delete_wrong_user = sql_client.delete('/users/102')
+    assert len(sql_client.get('/users/', headers=headers_sql).json) == user_count - 1, 'User count was not reduced after user deletion'
+    delete_wrong_user = sql_client.delete('/users/102', headers=headers_sql)
     assert delete_wrong_user.status_code == 404, 'Wrong status code on deleting non existing user'
     assert delete_wrong_user.json == {'error': 'User with id=102 was not found.'}, 'Wrong message on deleting non existing user'
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
-def test_read_user(sql_client, sql_db):
-    non_existing_user = sql_client.get('/users/24')
+def test_read_user(sql_client, sql_db, headers_sql):
+    non_existing_user = sql_client.get('/users/24', headers=headers_sql)
     assert non_existing_user.status_code == 404
     assert non_existing_user.json == {'error': 'User with id=24 was not found.'}
     sql_db._reset_users()
-    jim = sql_client.get('/users/2')
+    jim = sql_client.get('/users/2', headers=headers_sql)
     assert jim.status_code == 200
     assert jim.json == {'username': 'Jim', 'role': 'Salesman', 'id': 2}
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
-def test_update_user(sql_client, sql_db):
-    non_existing_user = sql_client.put('/users/24', json={'username': 'Jon'})
+def test_update_user(sql_client, sql_db, headers_sql):
+    non_existing_user = sql_client.put('/users/24', headers=headers_sql, json={'username': 'Jon'})
     assert non_existing_user.status_code == 404
     assert non_existing_user.json == {'error': 'User with id=24 was not found.'}
-    no_fields = sql_client.put('/users/1', json={})
+    no_fields = sql_client.put('/users/1', headers=headers_sql, json={})
     assert no_fields.status_code == 400
     assert no_fields.json == {'error': 'None of the fields was provided ("username", "password", "role").'}
-    wrong_field = sql_client.put('/users/1', json={'username': 'Bilbo', 'height': '124cm'})
+    wrong_field = sql_client.put('/users/1', headers=headers_sql, json={'username': 'Bilbo', 'height': '124cm'})
     assert wrong_field.status_code == 400
     assert wrong_field.json == {'error': 'Not allowed field(s): height.'}
     sql_db._reset_users()
-    new_jim = sql_client.put('/users/2', json={'username': 'Jimmy', 'role': 'Management'})
+    new_jim = sql_client.put('/users/2', headers=headers_sql, json={'username': 'Jimmy', 'role': 'Management'})
     assert new_jim.status_code == 200
     assert new_jim.json == {'username': 'Jimmy', 'role': 'Management', 'id': 2}
     
     token1 = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scott'}).json['token']
     check_token1 = sql_client.delete('/characters/3', headers={'Authorization': f'Bearer {token1}'})
     assert check_token1.status_code == 404
-    assert sql_client.put('/users/1', json={'password': 'Scottish'}).status_code == 200
+    assert sql_client.put('/users/1', headers=headers_sql, json={'password': 'Scottish'}).status_code == 200
     token2 = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scottish'}).json['token']
     check_token2 = sql_client.delete('/characters/3', headers={'Authorization': f'Bearer {token2}'})
     assert check_token2.status_code == 404
