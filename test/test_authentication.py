@@ -52,7 +52,7 @@ def test_sql_protected_endpoints(sql_client, headers_sql, robert_baratheon):
     expired = sql_client.post('/characters/', headers={'Authorization': f'Bearer {expired_token}'})
     assert expired.status_code == 401
     assert expired.json == {'error': 'Token has expired.'}
-    invalid_token = "eyJhbGciasdfewer34InR5cCI6IkpXVCJ9.eyJ1c2VybmwefdfasdfzxcvbSIsInJvbGUiOiJSZWNlcHRpb25pc3QiLCJleHAiOjE3NDU0MTIwNzh9.LuZeRxWouTQ8w-S1SfKZDufCFD1Qu0rmr9ZAFXntxR4"
+    invalid_token = generate_access_token('Michael').json['token'][4:]
     invalid = sql_client.post('/characters/', headers={'Authorization': f'Bearer {invalid_token}'})
     assert invalid.status_code == 401
     assert invalid.json == {'error': 'Token is invalid.'}
