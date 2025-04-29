@@ -1,5 +1,6 @@
 import pytest
 from utils.settings import skip_tests
+from utils.security import generate_access_token
 
 
 @pytest.mark.skipif(skip_tests['routes_json'], reason='Skipped by config')
@@ -332,6 +333,11 @@ def test_delete_user(sql_client, sql_db, headers_sql):
     delete_wrong_user = sql_client.delete('/users/102', headers=headers_sql)
     assert delete_wrong_user.status_code == 404, 'Wrong status code on deleting non existing user'
     assert delete_wrong_user.json == {'error': 'User with id=102 was not found.'}, 'Wrong message on deleting non existing user'
+    dwight_token = generate_access_token('Dwight').json['token']
+    delete_dwight = sql_client.delete('/users/me', headers={'Authorization': f'Bearer {dwight_token}'})
+    assert delete_dwight.status_code == 200
+    assert delete_dwight.json == {'username': 'Dwight', 'role': 'Assistant to the Regional Manager', 'id': 4}
+    assert sql_client.get('/users/4', headers=headers_sql).status_code == 404
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
@@ -343,6 +349,9 @@ def test_read_user(sql_client, sql_db, headers_sql):
     jim = sql_client.get('/users/2', headers=headers_sql)
     assert jim.status_code == 200
     assert jim.json == {'username': 'Jim', 'role': 'Salesman', 'id': 2}
+    read_me = sql_client.get('/users/me', headers=headers_sql)
+    assert read_me.status_code == 200
+    assert read_me.json == {'username': 'Michael', 'role': 'Regional Manager', 'id': 1}
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')
@@ -368,3 +377,16 @@ def test_update_user(sql_client, sql_db, headers_sql):
     token2 = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scottish'}).json['token']
     check_token2 = sql_client.delete('/characters/3', headers={'Authorization': f'Bearer {token2}'})
     assert check_token2.status_code == 404
+    dwight_header = {'Authorization': f'Bearer {generate_access_token('Dwight').json['token']}'}
+    new_role = sql_client.put('/users/me', headers=dwight_header, json={'role': 'Assistant Regional Manager'})
+    assert new_role.status_code == 200
+    assert new_role.json == {'username': 'Dwight', 'role': 'Assistant Regional Manager', 'id': 4}
+    wrong_update = sql_client.put('/users/me', headers=dwight_header, json={'name': 'Kevin'})
+    assert wrong_update.status_code == 400
+    assert wrong_update.json == {'error': 'None of the fields was provided ("username", "password", "role").'}
+    wrong_field_update = sql_client.put('/users/me', headers=dwight_header, json={'username': 'Kevin', 'eyes': 'Brown'})
+    assert wrong_field_update.status_code == 400
+    assert wrong_field_update.json == {'error': 'Not allowed field(s): eyes.'}
+    new_password = sql_client.put('/users/me', headers=dwight_header, json={'password': 'secret'})
+    new_dwight_token = sql_client.post('/login', json={'username': 'Dwight', 'password': 'secret'})
+    assert new_dwight_token.status_code == 200
