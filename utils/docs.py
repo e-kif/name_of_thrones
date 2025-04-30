@@ -607,7 +607,8 @@ swagger_template = {
                 'responses': {
                     '200': {'description': 'User deleted successfully.'},
                     '404': {'description': 'User not found.'},
-                    '401': {'description': 'Not authenticated.'}
+                    '401': {'description': 'Not authenticated.'},
+                    '403': {'description': 'User does not have permission for this endpoint.'}
                 }
             },
             'get': {
@@ -632,7 +633,8 @@ swagger_template = {
                 'responses': {
                     '200': {'description': 'Successfully retrieved the user details.'},
                     '404': {'description': 'User not found.'},
-                    '401': {'description': 'Not authenticated.'}
+                    '401': {'description': 'Not authenticated.'},
+                    '403': {'description': 'User does not have permission for this endpoint.'}
                 }
             },
             'put': {
@@ -687,12 +689,32 @@ swagger_template = {
                     '200': {'description': 'User updated successfully.'},
                     '400': {'description': 'Invalid input or no valid fields provided.'},
                     '404': {'description': 'User not found.'},
-                    '401': {'description': 'Not authenticated.'}
+                    '401': {'description': 'Not authenticated.'},
+                    '403': {'description': 'User does not have permission for this endpoint.'}
                 }
+            }
+        },
+
+        '/database/reset': {
+            'get': {
+                'summary': 'Resets application database',
+                'tags': ['Database'],
+                'description': 'Drops all tables of the app database, creates them and populates with default data.',
+                'security': [{'Bearer Auth': []}],
+                'produces': [
+                    'application/json'
+                ],
+                'parameters': [],
+                'responses': {
+                    '200': {'description': 'Database was reset successfully.'},
+                    '401': {'description': 'Not authenticated.'},
+                    '403': {'description': 'User does not have permission for this endpoint.'}
+                },
+
             }
         }
 
-            },
+    },
 
     'tags': [
         {
@@ -706,6 +728,10 @@ swagger_template = {
         {
             'name': 'Users Admin',
             'description': 'Endpoints for user management done by administrator (Regional Manager).'
+        },
+        {
+            'name': 'Database',
+            'description': 'Endpoints for database management done by administrator (Regional Manager).'
         }
     ]
 
