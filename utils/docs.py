@@ -449,7 +449,7 @@ swagger_template = {
                     'Users Admin'
                 ],
                 'description': 'Fetches a list of all users in the database.',
-                'security': [{'Bearer Auth': []}],
+                'security': [{'BearerAuth': []}],
                 'produces': [
                     'application/json'
                 ],
@@ -517,7 +517,7 @@ swagger_template = {
                 'summary': 'Fetches a current user',
                 'tags': ['Users'],
                 'description': 'Fetches current user\'s info.',
-                'security': [{'Bearer Auth': []}],
+                'security': [{'BearerAuth': []}],
                 'produces': [
                     'application/json'
                 ],
@@ -531,7 +531,7 @@ swagger_template = {
                 'summary': 'Updates a current user',
                 'tags': ['Users'],
                 'description': 'Updates current user\'s info.',
-                'security': [{'Bearer Auth': []}],
+                'security': [{'BearerAuth': []}],
                 'produces': ['application/json'],
                 'parameters': [{
                     'name': 'body',
@@ -572,7 +572,7 @@ swagger_template = {
                 'summary': 'Delete a current user',
                 'tags': ['Users'],
                 'description': 'Deletes a specific user by their unique ID.',
-                'security': [{'Bearer Auth': []}],
+                'security': [{'BearerAuth': []}],
                 'produces': [
                     'application/json'
                 ],
@@ -590,7 +590,7 @@ swagger_template = {
                 'tags': [
                     'Users Admin'
                 ],
-                'security': [{'Bearer Auth': []}],
+                'security': [{'BearerAuth': []}],
                 'description': 'Deletes a specific user by their unique ID.',
                 'produces': [
                     'application/json'
@@ -616,7 +616,7 @@ swagger_template = {
                 'tags': [
                     'Users Admin'
                 ],
-                'security': [{'Bearer Auth': []}],
+                'security': [{'BearerAuth': []}],
                 'description': 'Fetches the details of a specific user by their unique ID.',
                 'produces': [
                     'application/json'
@@ -642,7 +642,7 @@ swagger_template = {
                 'tags': [
                     'Users Admin'
                 ],
-                'security': [{'Bearer Auth': []}],
+                'security': [{'BearerAuth': []}],
                 'description': 'Updates the details of an existing user.'
                                'At least one of the fields (username, password, role) must be provided.',
                 'produces': [
@@ -699,8 +699,8 @@ swagger_template = {
             'get': {
                 'summary': 'Resets application database',
                 'tags': ['Database'],
-                'description': 'Drops all tables of the app database, creates them and populates with default data.',
-                'security': [{'Bearer Auth': []}],
+                'description': 'Drops all database tables, creates them and populates with the default data.',
+                'security': [{'BearerAuth': []}],
                 'produces': [
                     'application/json'
                 ],
