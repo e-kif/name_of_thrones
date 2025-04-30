@@ -8,6 +8,7 @@ flasgger==0.9.7.1
 Flask==3.1.0
 Flask-SQLAlchemy==3.1.1
 greenlet==3.2.0
+hupper==1.12.1
 iniconfig==2.1.0
 itsdangerous==2.2.0
 Jinja2==3.1.6
@@ -30,4 +31,5 @@ six==1.17.0
 SQLAlchemy==2.0.40
 typing-inspection==0.4.0
 typing_extensions==4.13.1
+waitress==3.0.2
 Werkzeug==3.1.3
