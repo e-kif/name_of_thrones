@@ -446,9 +446,10 @@ swagger_template = {
             'get': {
                 'summary': 'Retrieve all users',
                 'tags': [
-                    'Users'
+                    'Users Admin'
                 ],
                 'description': 'Fetches a list of all users in the database.',
+                'security': [{'Bearer Auth': []}],
                 'produces': [
                     'application/json'
                 ],
@@ -478,15 +479,15 @@ swagger_template = {
                             'properties': {
                                 'username': {
                                     'type': 'string',
-                                    'description': 'The username of the new user.'
+                                    'description': 'The new username of the current user.'
                                 },
                                 'password': {
                                     'type': 'string',
-                                    'description': 'The password for the new user.'
+                                    'description': 'The new password for the current user.'
                                 },
                                 'role': {
                                     'type': 'string',
-                                    'description': 'Optional role for the user.'
+                                    'description': 'New role for the current user.'
                                 }
                             },
                             'example': {
@@ -498,25 +499,98 @@ swagger_template = {
                     }
                 ],
                 'responses': {
-                    '201': {
-                        'description': 'User created successfully.'
+                    '200': {
+                        'description': 'User updated successfully.'
                     },
                     '400': {
-                        'description': 'Missing required fields or invalid input.'
+                        'description': 'Missing required field or invalid input.'
                     },
                     '409': {
-                        'description': 'Conflict due to duplicate data or forbidden fields.'
+                        'description': 'Conflict due to duplicate data.'
                     }
                 }
             }
+        },
+
+        '/users/me': {
+            'get': {
+                'summary': 'Fetches a current user',
+                'tags': ['Users'],
+                'description': 'Fetches current user\'s info.',
+                'security': [{'Bearer Auth': []}],
+                'produces': [
+                    'application/json'
+                ],
+                'parameters': [],
+                'responses': {
+                    '200': {'description': 'Current user info.'},
+                    '401': {'description': 'Not authenticated.'}
+                },
+            },
+            'put': {
+                'summary': 'Updates a current user',
+                'tags': ['Users'],
+                'description': 'Updates current user\'s info.',
+                'security': [{'Bearer Auth': []}],
+                'produces': ['application/json'],
+                'parameters': [{
+                    'name': 'body',
+                    'in': 'body',
+                    'description': 'User info to be updated.',
+                    'required': True,
+                    'schema': {
+                        'type': 'object',
+                        'properties': {
+                            'username': {
+                                'type': 'string',
+                                'description': 'The new username of the current user.'
+                            },
+                            'password': {
+                                'type': 'string',
+                                'description': 'The new password for the current user.'
+                            },
+                            'role': {
+                                'type': 'string',
+                                'description': 'The new role of the current user.'
+                            }
+                        },
+                        'example': {
+                            'username': 'user123',
+                            'password': 'securepassword',
+                            'role': 'Salesman'
+                        }
+                    }
+                }],
+                'responses': {
+                    '200': {'description': 'Updated current user info.'},
+                    '400': {'description': 'Invalid request body.'},
+                    '409': {'description': 'Conflict: username already taken.'},
+                    '401': {'description': 'Not authenticated.'}
+                }
+            },
+            'delete': {
+                'summary': 'Delete a current user',
+                'tags': ['Users'],
+                'description': 'Deletes a specific user by their unique ID.',
+                'security': [{'Bearer Auth': []}],
+                'produces': [
+                    'application/json'
+                ],
+                'parameters': [],
+                'responses': {
+                    '200': {'description': 'Current user deleted successfully.'},
+                    '401': {'description': 'Not authenticated.'}
+                },
+            },
         },
 
         '/users/{user_id}': {
             'delete': {
                 'summary': 'Delete a user by ID',
                 'tags': [
-                    'Users'
+                    'Users Admin'
                 ],
+                'security': [{'Bearer Auth': []}],
                 'description': 'Deletes a specific user by their unique ID.',
                 'produces': [
                     'application/json'
@@ -531,19 +605,17 @@ swagger_template = {
                     }
                 ],
                 'responses': {
-                    '200': {
-                        'description': 'User deleted successfully.'
-                    },
-                    '404': {
-                        'description': 'User not found.'
-                    }
+                    '200': {'description': 'User deleted successfully.'},
+                    '404': {'description': 'User not found.'},
+                    '401': {'description': 'Not authenticated.'}
                 }
             },
             'get': {
                 'summary': 'Retrieve a specific user by ID',
                 'tags': [
-                    'Users'
+                    'Users Admin'
                 ],
+                'security': [{'Bearer Auth': []}],
                 'description': 'Fetches the details of a specific user by their unique ID.',
                 'produces': [
                     'application/json'
@@ -558,19 +630,17 @@ swagger_template = {
                     }
                 ],
                 'responses': {
-                    '200': {
-                        'description': 'Successfully retrieved the user details.'
-                    },
-                    '404': {
-                        'description': 'User not found.'
-                    }
+                    '200': {'description': 'Successfully retrieved the user details.'},
+                    '404': {'description': 'User not found.'},
+                    '401': {'description': 'Not authenticated.'}
                 }
             },
             'put': {
                 'summary': 'Update a user by ID',
                 'tags': [
-                    'Users'
+                    'Users Admin'
                 ],
+                'security': [{'Bearer Auth': []}],
                 'description': 'Updates the details of an existing user.'
                                'At least one of the fields (username, password, role) must be provided.',
                 'produces': [
@@ -614,25 +684,28 @@ swagger_template = {
                     }
                 ],
                 'responses': {
-                    '200': {
-                        'description': 'User updated successfully.'
-                    },
-                    '400': {
-                        'description': 'Invalid input or no valid fields provided.'
-                    },
-                    '404': {
-                        'description': 'User not found.'
-                    }
+                    '200': {'description': 'User updated successfully.'},
+                    '400': {'description': 'Invalid input or no valid fields provided.'},
+                    '404': {'description': 'User not found.'},
+                    '401': {'description': 'Not authenticated.'}
                 }
             }
         }
 
-    },
+            },
 
     'tags': [
         {
             'name': 'Characters',
             'description': 'Endpoints for character management and retrieval.'
+        },
+        {
+            'name': 'Users',
+            'description': 'Endpoints for managing currently logged in user.'
+        },
+        {
+            'name': 'Users Admin',
+            'description': 'Endpoints for user management done by administrator (Regional Manager).'
         }
     ]
 
