@@ -176,3 +176,5 @@ cython_debug/
 # VIM files
 *.swp
 */*.swp
+.idea/
+.idea/*
