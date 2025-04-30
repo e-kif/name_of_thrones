@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request, current_app
-from schemas.characters import CharacterOut
 from utils.security import token_required
 
 characters_bp = Blueprint('character', __name__)
@@ -59,7 +58,7 @@ def get_character(character_id: int):
 
 
 @characters_bp.route('/', methods=['POST'])
-@token_required
+@token_required()
 def add_character():
     """Adds a new character to the application"""
     new_character = request.get_json()
@@ -73,7 +72,7 @@ def add_character():
 
 
 @characters_bp.route('/<int:character_id>', methods=['DELETE'])
-@token_required
+@token_required()
 def remove_character(character_id: int):
     """Deletes a character with given id from the application.
     If a character wasn't found - 404 error.
@@ -86,7 +85,7 @@ def remove_character(character_id: int):
 
 
 @characters_bp.route('/<int:character_id>', methods=['PUT'])
-@token_required
+@token_required()
 def update_character(character_id: int):
     """Updates a character with a given id with new data, provided in a payload.
     If a character was not found or invalid payload - returns error.
