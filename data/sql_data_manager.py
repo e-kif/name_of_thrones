@@ -17,6 +17,7 @@ class SQLDataManager(DataManager):
     def _reset_database(self):
         """Drops all tables, creates them and loads characters and users from json files"""
         json_characters = JSONDataManager().read_characters(limit=50)[0]
+        self.db.session.remove()
         self.db.drop_all()
         self.db.create_all()
         for character in json_characters:
