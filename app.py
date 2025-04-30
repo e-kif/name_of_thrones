@@ -57,5 +57,4 @@ if __name__ == '__main__':
 
     # todo pydantic schemas
     # todo update readme
-    # todo deploy
     # todo ci/cd workflow
