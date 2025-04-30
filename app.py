@@ -41,16 +41,21 @@ def create_app(db_path: str = None, use_sql: bool = False):
 
 def main():
     """Main function that starts the app"""
+    app = production()
+    app.run(debug=True)
+
+
+def production():
+    """Returns app instance for production deployment"""
     app = create_app(use_sql=use_sql_database)
     Swagger(app, template=swagger_template)
-    app.run(debug=True)
+    return app
 
 
 if __name__ == '__main__':
     main()  # pragma: no cover
 
     # todo pydantic schemas
-    # todo update requirements
     # todo update readme
     # todo deploy
     # todo ci/cd workflow
