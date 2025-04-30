@@ -47,7 +47,7 @@ def is_user_credentials_valid(username: str, password: str) -> bool:
         else password == user['password']
 
 
-def generate_access_token(username: str, exp_minutes: int = 30):
+def generate_access_token(username: str, exp_minutes: int | float = 30):
     """Generates JWT access token with encoded username, role and expiration time"""
     user = current_app.data_manager.get_user_by_name(username)
     token_payload = {

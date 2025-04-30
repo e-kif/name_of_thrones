@@ -1,5 +1,6 @@
 import pytest
 from utils.settings import skip_tests
+from utils.security import generate_access_token
 
 
 @pytest.mark.skipif(skip_tests['authentication'], reason='Skipped by config')
@@ -14,8 +15,8 @@ def test_is_user_credentials_valid_json(validate_user_json):
 
 @pytest.mark.skipif(skip_tests['authentication'], reason='Skipped by config')
 def test_token_generation_sql(sql_client, sql_db):
-    sql_client.get('/database/reset')
-    with pytest.raises(Exception):
+    sql_db._reset_database()
+    with pytest.raises(KeyError):
         sql_client.post('/login', json={'username': 'micha', 'password': 'whatever'})
     missing_user = sql_client.post('/login', json={'password': 'qwerty'})
     assert missing_user.status_code == 400, 'Wrong status code for missing username'
@@ -34,23 +35,51 @@ def test_token_generation_sql(sql_client, sql_db):
 
 
 @pytest.mark.skipif(skip_tests['authentication'], reason='Skipped by config')
-def test_sql_protected_endpoints(sql_client, headers_sql, robert_baratheon):
+def test_sql_protected_characters_endpoints(sql_client, headers_sql, robert_baratheon):
     wrong_credentials = sql_client.post('/login', json={'username': 'Michael', 'password': 'der_password'})
     assert wrong_credentials.status_code == 401, 'Wrong status code for invalid credentials'
     assert wrong_credentials.json == {'error': 'Invalid username or password'}, 'Wrong message for invalid credentials'
     non_auth = sql_client.post('/characters/')
     assert non_auth.status_code == 401, 'Wrong status code for protected endpoint'
     assert non_auth.json == {'error': 'Authentication failed: no token provided.'}
-    ghost_id = sql_client.post('/users/', json={'username': 'tmp', 'password': 't', 'role': 'Ghost'}).json['id']
+    sql_client.post('/users/', json={'username': 'tmp', 'password': 't', 'role': 'ghost'})
     ghost_token = sql_client.post('/login', json={'username': 'tmp', 'password': 't'}).json['token']
-    sql_client.delete(f'/users/{ghost_id}')
+    sql_client.delete(f'/users/me', headers={'Authorization': f'Bearer {ghost_token}'})
     with pytest.raises(KeyError):
         sql_client.post('/characters/', json=robert_baratheon, headers={'Authorization': f'Bearer {ghost_token}'})
-    expired_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlBhbSIsInJvbGUiOiJSZWNlcHRpb25pc3QiLCJleHAiOjE3NDU0MTIwNzh9.LuZeRxWouTQ8w-S1SfKZDufCFD1Qu0rmr9ZAFXntxR4"
+    expired_token = generate_access_token('Michael', 0.000001).json['token']
     expired = sql_client.post('/characters/', headers={'Authorization': f'Bearer {expired_token}'})
     assert expired.status_code == 401
     assert expired.json == {'error': 'Token has expired.'}
-    invalid_token = "eyJhbGciasdfewer34InR5cCI6IkpXVCJ9.eyJ1c2VybmwefdfasdfzxcvbSIsInJvbGUiOiJSZWNlcHRpb25pc3QiLCJleHAiOjE3NDU0MTIwNzh9.LuZeRxWouTQ8w-S1SfKZDufCFD1Qu0rmr9ZAFXntxR4"
+    invalid_token = generate_access_token('Michael').json['token'][4:]
     invalid = sql_client.post('/characters/', headers={'Authorization': f'Bearer {invalid_token}'})
     assert invalid.status_code == 401
     assert invalid.json == {'error': 'Token is invalid.'}
+
+
+@pytest.mark.skipif(skip_tests['authentication'], reason='Skipped by config')
+def test_sql_protected_users_endpoints(sql_client, sql_db, headers_sql):
+    sql_db._reset_database()
+    non_authorized = sql_client.get('/users/me')
+    assert non_authorized.status_code == 401
+    assert non_authorized.json == {'error': 'Authentication failed: no token provided.'}
+    token_pam = generate_access_token('Pam').json['token']
+    auth_pam = sql_client.get('/users/me', headers={'Authorization': f'Bearer {token_pam}'})
+    assert auth_pam.json == {'username': 'Pam', 'role': 'Receptionist', 'id': 3}
+    token_jim = generate_access_token('Jim').json['token']
+    auth_jim = sql_client.get('/users/me', headers={'Authorization': f'Bearer {token_jim}'})
+    assert auth_jim.json == {'username': 'Jim', 'role': 'Salesman', 'id': 2}
+    token_dwight = generate_access_token('Dwight').json['token']
+    auth_dwight = sql_client.get('/users/me', headers={'Authorization': f'Bearer {token_dwight}'})
+    assert auth_dwight.json == {'username': 'Dwight', 'role': 'Assistant to the Regional Manager', 'id': 4}
+    token_michael = generate_access_token('Michael').json['token']
+    auth_michael = sql_client.get('/users/me', headers={'Authorization': f'Bearer {token_michael}'})
+    assert auth_michael.json == {'username': 'Michael', 'role': 'Regional Manager', 'id': 1}
+    wrong_role = sql_client.get('/users/', headers={'Authorization': f'Bearer {token_dwight}'})
+    assert wrong_role.status_code == 401
+    assert wrong_role.json == {'error': 'Only Regional Manager is allowed to access this endpoint.'}
+    wrong_role = sql_client.get('/users/4', headers={'Authorization': f'Bearer {token_dwight}'})
+    assert wrong_role.status_code == 401
+    assert wrong_role.json == {'error': 'Only Regional Manager is allowed to access this endpoint.'}
+    correct_role = sql_client.get('/users/', headers={'Authorization': f'Bearer {token_michael}'})
+    assert correct_role.status_code == 200
