@@ -7,13 +7,13 @@ swagger_template = {
     'basePath': '/',
     'schemes': ['http', 'https'],
     'securityDefinitions': {
-        'BearerAuth': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header',
-            'description': 'Enter "Bearer <token>" after logging in to access secured endpoints.'
+        'APIKeyHeader': {
+            'type': 'oauth2',
+            'tokenUrl': '/login',
+            'flow': 'password',
+            'scopes': {},
+            'description': 'Enter username and password in order to authorize.'
         }},
-
     'paths': {
         '/characters/': {
             'get': {
@@ -151,11 +151,7 @@ swagger_template = {
                 'tags': [
                     'Characters'
                 ],
-                'security': [
-                    {
-                        'BearerAuth': []
-                    }
-                ],
+                'security': [{'APIKeyHeader': []}],
                 'description': 'Creates a new character in the database. Requires a valid token for authorization.',
                 'produces': [
                     'application/json'
@@ -273,11 +269,7 @@ swagger_template = {
                 'tags': [
                     'Characters'
                 ],
-                'security': [
-                    {
-                        'BearerAuth': []
-                    }
-                ],
+                'security': [{'APIKeyHeader': []}],
                 'description': 'Deletes a specific character from the database by its unique ID.'
                                'Requires a valid token for authorization.',
                 'produces': [
@@ -306,11 +298,7 @@ swagger_template = {
                 'tags': [
                     'Characters'
                 ],
-                'security': [
-                    {
-                        'BearerAuth': []
-                    }
-                ],
+                'security': [{'APIKeyHeader': []}],
                 'description': 'Updates an existing character in the database'
                                'using its unique ID. Requires a valid token for authorization.',
                 'produces': [
@@ -449,7 +437,7 @@ swagger_template = {
                     'Users Admin'
                 ],
                 'description': 'Fetches a list of all users in the database.',
-                'security': [{'BearerAuth': []}],
+                'security': [{'APIKeyHeader': []}],
                 'produces': [
                     'application/json'
                 ],
@@ -517,7 +505,7 @@ swagger_template = {
                 'summary': 'Fetches a current user',
                 'tags': ['Users'],
                 'description': 'Fetches current user\'s info.',
-                'security': [{'BearerAuth': []}],
+                'security': [{'APIKeyHeader': []}],
                 'produces': [
                     'application/json'
                 ],
@@ -531,7 +519,7 @@ swagger_template = {
                 'summary': 'Updates a current user',
                 'tags': ['Users'],
                 'description': 'Updates current user\'s info.',
-                'security': [{'BearerAuth': []}],
+                'security': [{'APIKeyHeader': []}],
                 'produces': ['application/json'],
                 'parameters': [{
                     'name': 'body',
@@ -572,7 +560,7 @@ swagger_template = {
                 'summary': 'Delete a current user',
                 'tags': ['Users'],
                 'description': 'Deletes a specific user by their unique ID.',
-                'security': [{'BearerAuth': []}],
+                'security': [{'APIKeyHeader': []}],
                 'produces': [
                     'application/json'
                 ],
@@ -590,7 +578,7 @@ swagger_template = {
                 'tags': [
                     'Users Admin'
                 ],
-                'security': [{'BearerAuth': []}],
+                'security': [{'APIKeyHeader': []}],
                 'description': 'Deletes a specific user by their unique ID.',
                 'produces': [
                     'application/json'
@@ -616,7 +604,7 @@ swagger_template = {
                 'tags': [
                     'Users Admin'
                 ],
-                'security': [{'BearerAuth': []}],
+                'security': [{'APIKeyHeader': []}],
                 'description': 'Fetches the details of a specific user by their unique ID.',
                 'produces': [
                     'application/json'
@@ -642,7 +630,7 @@ swagger_template = {
                 'tags': [
                     'Users Admin'
                 ],
-                'security': [{'BearerAuth': []}],
+                'security': [{'APIKeyHeader': []}],
                 'description': 'Updates the details of an existing user.'
                                'At least one of the fields (username, password, role) must be provided.',
                 'produces': [
@@ -700,7 +688,7 @@ swagger_template = {
                 'summary': 'Resets application database',
                 'tags': ['Database'],
                 'description': 'Drops all database tables, creates them and populates with the default data.',
-                'security': [{'BearerAuth': []}],
+                'security': [{'APIKeyHeader': []}],
                 'produces': [
                     'application/json'
                 ],
@@ -733,6 +721,6 @@ swagger_template = {
             'name': 'Database',
             'description': 'Endpoints for database management done by administrator (Regional Manager).'
         }
-    ]
+    ],
 
 }

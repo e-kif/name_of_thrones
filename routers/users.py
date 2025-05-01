@@ -10,13 +10,16 @@ def login():
     """Checks for provided login data in payload. If valid returns token with success status code.
     If invalid - error message with error status code (400 or 401).
     """
-    data = request.get_json()
-    if any([not data, 'username' not in data, 'password' not in data]):
+    username = request.form.get('username')
+    password = request.form.get('password')
+    if any([username is None, password is None]):
         return jsonify({'error': 'Missing username or password'}), 400
-    username, password = data['username'], data['password']
+    # username, password = data['username'], data['password']
     if not is_user_credentials_valid(username, password):
         return jsonify({'error': 'Invalid username or password'}), 401
-    return generate_access_token(username), 200
+    token_str = generate_access_token(username).json['token']
+    token = {'access_token': token_str, 'token_type': 'bearer'}
+    return token, 200
 
 
 @users_bp.route('/', methods=['POST'])
