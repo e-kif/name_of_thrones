@@ -1,3 +1,7 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 swagger_template = {
     'swagger': '2.0',
     'info': {
@@ -5,7 +9,7 @@ swagger_template = {
         'description': 'It\'s like the Game of Thrones but more focused on the Names of show\'s characters.',
         'version': '1.0'},
     'basePath': '/',
-    'schemes': ['http', 'https'],
+    'schemes': [os.getenv('PROTOCOL')],
     'securityDefinitions': {
         'APIKeyHeader': {
             'type': 'oauth2',
@@ -724,3 +728,6 @@ swagger_template = {
     ],
 
 }
+
+
+
