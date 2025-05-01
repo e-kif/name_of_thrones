@@ -1,5 +1,6 @@
 import os
 from flask import Flask, g
+from flask_cors import CORS
 from flasgger import Swagger
 from dotenv import load_dotenv
 from routers import database_bp, characters_bp, errorhandlers_bp, authentication_bp, users_bp
@@ -49,6 +50,7 @@ def production():
     """Returns app instance for production deployment"""
     app = create_app(use_sql=use_sql_database)
     Swagger(app, template=swagger_template)
+    CORS(app)
     return app
 
 
