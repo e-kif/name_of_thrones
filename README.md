@@ -78,7 +78,35 @@ Stay ahead of the chaos. With Name of Thrones, youâ€™ll never lose track of whoâ
 
 ## Forge of code
 
-Coming soon...
+Peek behind the curtain to discover the enchanted ingredients that power the App - a mystical concoction forged from the rarest elements of modern coding. Each dependency was chosen like a secret spice in an alchemist's potion, lending its unique magic to our digital realm.
+
+### The Anvil of Application
+
+- *Flask (v3.1.0):* The nimble conjurer that forms the backbone of the App, channeling requests and responses with wizard-like speed.
+
+- *Flask-SQLAlchemy (v3.1.1) & SQLAlchemy (v2.0.40):* This dynamic duo maps your kingdom's data with the precision of an enchanted quill recording ancient lore, making database interactions seamless and reliable.
+
+- *Werkzeug (v3.1.3):* The trusted scribe that transforms raw data into captivating presentations, ensuring every detail is rendered with the elegance of a master storyteller.
+
+### The Sword's Edge: API and Documentation
+
+- *Flasgger (v0.9.7.1):* Experience the magic of interactive API exploration. With a sleek GUI, this tool lets you test endpoints as effortlessly as consulting an oracle - all without needing extra incantations like cURL or Postman.
+
+### Defending the Wall
+
+- *bcrypt (v4.3.0):* The Night's Watch of the App, standing resolute against the icy onslaught of unwanted intruders. No matter how many times they try to break through, this fortress holds strong.
+
+- *isdangerous (v2.2.0) & PyJWT (v2.10.1):* As ancient runes and enchantments protect the realm from dark forces, these mystical guardians ensure that token-base authentication remains as impenetrable as the wards sealing off the lands from White Walker infiltration.
+
+### Bridging to the World of Data
+
+- *psycopg2-binary (v2.9.10):* Acting as the steadfast courier between the App and PostgreSQL, this tool ensures your data flows as reliably as a well-trained falcon on a mission.
+
+### Deployment: Setting the Stage for Adventure
+
+- *waitress (v3.0.2):* A production-grade server that stands at the vanguard, reliably serving the App to the world as if it were a mighty battalion on parade.
+
+- *hupper (v.1.12.1):* The ever-watchful sentinel that detects code changes and breathes new life into the App, reminiscent of a messenger swiftly transmitting fresh orders across the realm.
 
 
 ## Claim the Throne
