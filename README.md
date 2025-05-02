@@ -54,6 +54,27 @@ Stay ahead of the chaos. With Name of Thrones, youâ€™ll never lose track of whoâ
 
 - *Character Attributes:* Track names, houses, animals, symbols, nicknames, roles, ages, deaths, and even their strength - because every detail matters in the game of thrones!
 
+### A Tale of Two Storages
+
+- *Ephemeral vs Eternal:* Choose your storage wisely! Will you live in the fleeting moment with JSON-based-in-memory storage (vanishing upon program shutdown, like a Read Priest's visions), or will you etch your data into PostgreSQL, ensuring persistence through every restart - because some things, like Valyrian steel and grudges, are meant to last forever.
+
+### Lords, Ladies, and The Office
+
+- *User Management:* Every kingdom has its rules and subjects, and Name of Thrones is no different! CUD operations for users allow you to manage your cast of Office characters.
+
+- *Regional Managers & Associates:* The hierarchy hierarchy is clear - Regional Managers (AKA Admins) wield power over all users, granting them the ability to read, modify, and delete any account. Others? Well, they can only manage their own profiles. After all, not everyone can be Michael Scott.
+
+### When Two Worlds Collide
+
+- *Dual Roles, Double the Fun:* In our realm, authenticated Office characters aren't just busy managing their own affairs. They step into the arena and wield their mighty CUD powers on Game of Thrones characters! Whether you're channeling your inner Michael Scott or thinking like Dwight Schrute, you'll create, update and delete Westerosi legentds with a single click. This dual functionality makes sure that every character - be it Scrontonian or a ruler of Westeros - gets the attention they deserve.
+
+### A Do-Over Worthy of a Time Turner
+
+- *Database Reset:* Sometimes, you just want to wipe the slate clean, send everything back to square one, and start fresh - whether it's avoiding a workplace scandal or undoing a battle blunder. The mighty "Reset Database" feature, available only to the exalted Regional Managers, restores the PostgreSQL database to its original state. Use it wisely, lest you invoke the wrath of your subjects.
+
+### A Scroll of Convenience
+
+- *Flasgger Documentation:* Why toil with cURL or Postman when you can interact with endpoints using a sleek GUI? With Flassger, your API is presented like a royal decree, making exploration and testing easier than ever - no ravens required.
 
 ## Forge of code
 
