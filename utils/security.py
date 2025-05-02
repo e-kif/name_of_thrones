@@ -56,7 +56,7 @@ def generate_access_token(username: str, exp_minutes: int | float = 30):
         'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=exp_minutes)
     }
     token = jwt.encode(token_payload, current_app.config['SECRET_KEY'], algorithm='HS256')
-    return jsonify({'token': token})
+    return jsonify({'access_token': token})
 
 
 def hash_password(password: str) -> str:

@@ -333,7 +333,7 @@ def test_delete_user(sql_client, sql_db, headers_sql):
     delete_wrong_user = sql_client.delete('/users/102', headers=headers_sql)
     assert delete_wrong_user.status_code == 404, 'Wrong status code on deleting non existing user'
     assert delete_wrong_user.json == {'error': 'User with id=102 was not found.'}, 'Wrong message on deleting non existing user'
-    dwight_token = generate_access_token('Dwight').json['token']
+    dwight_token = generate_access_token('Dwight').json['access_token']
     delete_dwight = sql_client.delete('/users/me', headers={'Authorization': f'Bearer {dwight_token}'})
     assert delete_dwight.status_code == 200
     assert delete_dwight.json == {'username': 'Dwight', 'role': 'Assistant to the Regional Manager', 'id': 4}
@@ -370,14 +370,14 @@ def test_update_user(sql_client, sql_db, headers_sql):
     assert new_jim.status_code == 200
     assert new_jim.json == {'username': 'Jimmy', 'role': 'Management', 'id': 2}
     
-    token1 = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scott'}).json['token']
+    token1 = sql_client.post('/login', data={'username': 'Michael', 'password': 'Scott'}).json['access_token']
     check_token1 = sql_client.delete('/characters/3', headers={'Authorization': f'Bearer {token1}'})
     assert check_token1.status_code == 404
     assert sql_client.put('/users/1', headers=headers_sql, json={'password': 'Scottish'}).status_code == 200
-    token2 = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scottish'}).json['token']
+    token2 = sql_client.post('/login', data={'username': 'Michael', 'password': 'Scottish'}).json['access_token']
     check_token2 = sql_client.delete('/characters/3', headers={'Authorization': f'Bearer {token2}'})
     assert check_token2.status_code == 404
-    dwight_header = {'Authorization': f'Bearer {generate_access_token('Dwight').json['token']}'}
+    dwight_header = {'Authorization': f'Bearer {generate_access_token('Dwight').json["access_token"]}'}
     new_role = sql_client.put('/users/me', headers=dwight_header, json={'role': 'Assistant Regional Manager'})
     assert new_role.status_code == 200
     assert new_role.json == {'username': 'Dwight', 'role': 'Assistant Regional Manager', 'id': 4}
@@ -388,5 +388,5 @@ def test_update_user(sql_client, sql_db, headers_sql):
     assert wrong_field_update.status_code == 400
     assert wrong_field_update.json == {'error': 'Not allowed field(s): eyes.'}
     new_password = sql_client.put('/users/me', headers=dwight_header, json={'password': 'secret'})
-    new_dwight_token = sql_client.post('/login', json={'username': 'Dwight', 'password': 'secret'})
+    new_dwight_token = sql_client.post('/login', data={'username': 'Dwight', 'password': 'secret'})
     assert new_dwight_token.status_code == 200

@@ -17,7 +17,7 @@ def login():
     # username, password = data['username'], data['password']
     if not is_user_credentials_valid(username, password):
         return jsonify({'error': 'Invalid username or password'}), 401
-    token_str = generate_access_token(username).json['token']
+    token_str = generate_access_token(username).json['access_token']
     token = {'access_token': token_str, 'token_type': 'bearer'}
     return token, 200
 

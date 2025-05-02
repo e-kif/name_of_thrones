@@ -62,14 +62,14 @@ def sql_client(sql_app):
 
 @pytest.fixture()
 def headers_json(json_client):
-    token = json_client.post('/login', json={'username': 'Michael', 'password': 'Scott'}).json['token']
+    token = json_client.post('/login', data={'username': 'Michael', 'password': 'Scott'}).json['access_token']
     yield {'Authorization': f'Bearer {token}'}
 
 
 @pytest.fixture(scope='function')
 def headers_sql(sql_client, sql_db):
     sql_db._reset_users()
-    token = sql_client.post('/login', json={'username': 'Michael', 'password': 'Scott'}).json['token']
+    token = sql_client.post('/login', data={'username': 'Michael', 'password': 'Scott'}).json['access_token']
     yield {'Authorization': f'Bearer {token}'}
 
 
