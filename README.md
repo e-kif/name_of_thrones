@@ -177,7 +177,48 @@ Follow these steps to conquer the realm and establish your app like a true sover
 
 ## Rally the Bannermen
 
-Coming soon...
+Instructions on How to Run the Server
+
+Assemble your forces and let your digital kingdom come alive! Whether you're staging a local skirmish or launching a full-scale siege, these instructions will mobilize your server like a fleet marching to conquer new territories. Remember, *'When you play the game of Throes, you win or you die'* - so ensure your deployment strategy is as formidable as a well-planned conquest.
+
+### For Local Development
+
+#### Prepare Your War Room
+
+Ensure your virtual environment is activated:
+- Unix/Linux: `source .venv/bin/activate`
+- Windows: `.venv\Scripts\activate`
+
+#### Command the Development Forces
+
+Start your app with Flask's built-in server:
+`python3 app.py`
+This spins up your development sever, perfect for testing new strategies and making tactical adjustments in real time.
+
+### For Production Deployment
+
+#### Double-Check Your Battle Plans
+
+Verify that your `.env` file is solid:
+- *DATABASE_URI:* Correctly set to connect your PostgresSQL fortress.
+- *SECRET_KEY:* A potent secret to safeguard your realm.
+- *PROTOCOL:* Use `'https'` to secure your kingdom if you've equipped SSL certificates.
+
+#### Deploy with Waitress
+
+When it's time for the main siege, use *Waitress* to stand guard at your front lines:
+
+`waitress-serve --port=80 --call 'app:production'`
+
+Replace _80_ with your desired port. This production-grade server ensures that your application remains resilient and accessible to loyal subjects far and wide.
+
+#### Optional: Hupper for Rapid Reinforcements
+
+For those times when every change needs to echo immediately across the battlefield, launch your app using _Hupper:_
+`hupper -m waitress-serve --port=80 --call 'app:production'`
+This ensures your forces are constantly in sync with your latest commands.
+
+With these commands, you're not merely running a server - you're unleashing an army of digital prowess. Your web domain is set to become a realm where every visitor experiences the might of your technological mastery.
 
 ## Whispers in the Wind
 
