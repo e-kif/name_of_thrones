@@ -222,15 +222,25 @@ With these commands, you're not merely running a server - you're unleashing an a
 
 ## Whispers in the Wind
 
+The unseen forces guiding the realm. This section outlines the silent rules shaping the foundation of the system - assumptions that ensure stability in the ever-shifting landscape of data and logic. Like the _Faceless Men_, these truths are ever-present yet seldom noticed, subtly influencing the world from the shadows. Though unspoken, they dictate the order of  things, much like whispered intrigues in the halls of power.
+
 ### Assumptions:
 
-1. Required character fields are 'name', 'role' and 'strength' (based on initial characters.json file).
-2. Users are not allowed to modify character's id.
-3. Filter field pair mentioned in assignment *age_more_than* and *age_less_then* are not typos rather an attentiveness test.
-4. If sort order was not provided anolgside with sorting parameter, *sort_asc* is assumed.
-5. When sorting in ascending order by optional key *None* values are at the end of the list.
-6. Empty string in filter value means the key is *None*.
+1. **Required character fields** are _name_, _role_ and _strength_, as determined from the initial _characters.json_ file. These attributes are as fundamental as a sword to a knight - every character must possess them to stand firm in the story.
 
+2. **Optional fields** are determined based on the presence of _null_ values in the _characters.json_ file. If an attribute is missing for any character, it is considered optional - much like the unpredictable fate of minor lords in Westeros. Some details may vanish into obscurity, but the realm endures.
+
+3. **Immutable IDs:** The identities of both characters and users are set in stone - no mortal (or developer) shall alter them. Much like the names in the annals of history or the lineage of noble houses, IDs remain unchangeable, ensuring the integrity of the realm.
+
+4.  **The Quill vs. The Rusted Blade.** In the realm of logic and precision, a good scribe wields the well-forged *age_less_than*, ensuring calculations stand true like Master-written records. However, lurking in the shadows, the not-so-gifted scribe wields the questionable *age_less_then* - a blade dulled by typos, ready to betray unsuspecting code warriors.
+
+    Fear not, for this app accommodates both, though we advise keeping your scrolls error-free—lest the Citadel revoke your writing privileges!
+
+5. **Default Sort Order:** If no specific sort order is declared alongside the sorting parameter, the system shall assume _sort_asc_ - much like how the realm follows tradition when no ruler steps forward to redefine the order of things. Order must prevail, lest chaos reign across the kingdom!
+
+6. **Sorting Behavior:** When sorting is ascending order by an optional key, entries with _None_ values shall gracefully retreat to the end of the list - much like exiled lords and fallen houses, lingering on the edges of history.
+
+7. **Interpreting Empty Filter Values:** An empty string withing a filter value is taken as a signal that the key is _None_ - much like how a name whispered into the void fades into obscurity. Some truths are left unspoken, but their absence speaks volumes.
 
 ## A Programmer’s Oath
    
