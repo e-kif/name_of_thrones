@@ -3,38 +3,38 @@ It's like Game of Thrones but more focused on the Names of show's characters.
 
 ## Table of Contents
 
-1. [**The Realm Unveiled** – *Description*](#the-realm-unveiled)  
+1. [**The Realm Unveiled** - *Description*](#the-realm-unveiled)  
    Discover the purpose and magic behind the app that tracks characters in Westeros.  
 
-2. [**Feast of Features** – *Features*](#feast-of-features)  
+2. [**Feast of Features** - *Features*](#feast-of-features)  
    A banquet of functionalities to keep your GoT character chaos in check.  
 
-3. [**Forge of Code** – *Tech Stack*](#forge-of-code)  
+3. [**Forge of Code** - *Tech Stack*](#forge-of-code)  
    Peek into the tools and technologies that power your app - crafted like Valyrian steel.  
 
-4. [**Claim the Throne** – *Setup Instructions*](#claim-the-throne)  
+4. [**Claim the Throne** - *Setup Instructions*](#claim-the-throne)  
    Step-by-step guidance to conquer the realm and set up your app like a true ruler.  
 
-5. [**Rally the Bannermen** – *Instructions on How to Run the Server*](#rally-the-bannermen)  
+5. [**Rally the Bannermen** - *Instructions on How to Run the Server*](#rally-the-bannermen)  
    Assemble your forces and learn how to bring the app to life (server-side).  
 
-6. [**Whispers in the Wind** – *Made Assumptions*](#whispers-in-the-wind)  
+6. [**Whispers in the Wind** - *Made Assumptions*](#whispers-in-the-wind)  
    A list of assumptions made while building the app - because even the Maesters can’t know everything.  
 
-7. [**A Programmer’s Oath** – *Brief Description of Programmer's Approach*](#a-programmers-oath)  
+7. [**A Programmer’s Oath** - *Brief Description of Programmer's Approach*](#a-programmers-oath)  
    The thought process behind crafting an app worthy of the Iron Throne.  
 
-8. [**The Scroll of Endpoints** – *List of All API Endpoints*](#the-scroll-of-endpoints)  
+8. [**The Scroll of Endpoints** - *List of All API Endpoints*](#the-scroll-of-endpoints)  
    A detailed map of routes to navigate the kingdom of data.  
 
-9. **Defend the Realm** – *Testing*  
+9. **Defend the Realm** - *Testing*  
    - [9.1 **Clear Instructions on How to Run the Tests**](#clear-instructions-on-how-to-run-the-tests)  
         Arm yourself with knowledge to ensure the integrity of your app remains unbroken.  
-   - [9.2 **The Trial of Tests** – *Test Results Interpretations*](#the-trial-of-tests)  
+   - [9.2 **The Trial of Tests** - *Test Results Interpretations*](#the-trial-of-tests)  
         Decipher the outcomes of testing battles and see who stands victorious.  
-   - [9.3 **The Allies You’ll Need** – *Dependencies Needed for Testing*](#the-allies-youll-need)  
+   - [9.3 **The Allies You’ll Need** - *Dependencies Needed for Testing*](#the-allies-youll-need)  
         A roster of key tools and frameworks that support your testing efforts.  
-   - [9.4 **Command the Test Army** – *Sample Testing Commands for Running Tests*](#command-the-test-army)  
+   - [9.4 **Command the Test Army** - *Sample Testing Commands for Running Tests*](#command-the-test-army)  
         Your battle-ready commands for unleashing the full power of the test suite.  
 
 
@@ -56,7 +56,7 @@ Stay ahead of the chaos. With Name of Thrones, you’ll never lose track of who�
 
 ### A Tale of Two Storages
 
-- *Ephemeral vs Eternal:* Choose your storage wisely! Will you live in the fleeting moment with JSON-based-in-memory storage (vanishing upon program shutdown, like a Read Priest's visions), or will you etch your data into PostgreSQL, ensuring persistence through every restart - because some things, like Valyrian steel and grudges, are meant to last forever.
+- *Ephemeral vs Eternal:* Choose your storage wisely! Will you live in the fleeting moment with JSON-based-in-memory storage (vanishing upon program shutdown, like a Read Priest's visions), or will you etch your data into PostgreSQL, ensuring persistence through every restart? Some things, like Valyrian steel and grudges, are meant to last forever - and the North remembers.
 
 ### Lords, Ladies, and The Office
 
@@ -111,7 +111,68 @@ Peek behind the curtain to discover the enchanted ingredients that power the App
 
 ## Claim the Throne
 
-Coming soon...
+Follow these steps to conquer the realm and establish your app like a true sovereign:
+
+1. Conquer the Repository
+
+    **Clone the Repository:** Begin your conquest by cloning the code repository into your local keep. Replace the URL with your repository's sacred link:
+
+    `git clone htts://github.com/e-kif/name_of_thrones`
+
+2. Prepare Your Battleground
+
+    **Create a Virtual Environment:** Forge an isolated realm for your app by creating a Python virtual environment:
+
+    `python3 -m venv .venv`
+
+    Activate the Virtual Environment:
+
+    - On Unix/Linux:
+    `source .venv/bin/activate`
+
+    - On Windows:
+    `.venv/Scripts/activate`
+
+3. Arm Yourself with the Tools of the Trade
+
+    **Install Dependencies:** Equip yourself with all the enchanted ingredients required by the application:
+
+    `pip3 install -r requirements.txt`
+
+    This command gathers every gem and artifact needed for your kingdom.
+
+4. Draft Your Secret Scroll
+
+    Create & Populate the *.env* File: At the root of your project, create a file named *.env* containing your realm's secret configurations:
+
+    ```python
+    DATABASE_URI='postgresql://username:password@host:port/db_name'
+    SECRET_KEY='you-secret-key'
+    PROTOCOL='http' # Use 'https for a fortified realm in production with SSL certificates
+    ```
+    Replace _username_, _password_, _host_, _port_ and *db_name* with your actual database details. The *SECRET_KEY* should be a robust, mysterious string to secure your citizens against dark arts.
+
+5. Prepare the Database Realm
+
+   Set Up the SQL Database:
+
+   Ensure PostgreSQL is installed and running in your domain.
+
+   Create the database using your PostgreSQL client (for example):
+
+   `CREATE DATABASE db_name;`
+
+   Ensure the credentials in your *.env* file align with what you've set up. Gather your database's user, password and host details as these will be the keys to your treasure vault.
+
+6. Additional Tips for a Ruling Master
+
+   **Environment Virables:** Verify that your *.env* file is loaded correctly.
+
+   Local vs. Production Protocols:
+
+   For day-to-day rulership (local development), use `PROTOCOL='http'`.
+
+   For deployment, fortify your realm with `'PROTOCOL=https'` and install valid SSL certificates to protect your subjects.
 
 
 ## Rally the Bannermen
