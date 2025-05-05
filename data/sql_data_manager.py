@@ -146,6 +146,13 @@ class SQLDataManager(DataManager):
             raise ValueError(f'Character\'s {empty_req_fields[0]} can not be empty.')
         if self._character_exists(character['name']):
             raise AttributeError(f'Character {character["name"]} already exists.')
+        for field in {'age', 'death'}:
+            if character.get(field) and not isinstance(character[field], int):
+                raise TypeError(f'Character\'s {field} should be an integer.')
+        for field in Characters.allowed_fields.difference({'age', 'death'}):
+            if character.get(field) and not isinstance(character[field], str):
+                raise TypeError(f'Character\'s {field} should be a string.')
+
 
         character_req = {key: value for key, value in character.items()
                          if value is not None and key in Characters.req_fields}

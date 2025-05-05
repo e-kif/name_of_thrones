@@ -67,6 +67,8 @@ def add_character():
         return jsonify(db_character[0]), db_character[1]
     except ValueError as error:
         return jsonify({'error': error.args[0]}), 400
+    except TypeError as error:
+        return jsonify({'error': error.args[0]}), 400
     except AttributeError as error:
         return jsonify({'error': error.args[0]}), 409
 
