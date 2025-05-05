@@ -127,11 +127,9 @@ Follow these steps to conquer the realm and establish your app like a true sover
 
     Activate the Virtual Environment:
 
-    - On Unix/Linux:
-    `source .venv/bin/activate`
+    - On Unix/Linux: `source .venv/bin/activate`
 
-    - On Windows:
-    `.venv/Scripts/activate`
+    - On Windows: `.venv/Scripts/activate`
 
 3. Arm Yourself with the Tools of the Trade
 
@@ -150,7 +148,7 @@ Follow these steps to conquer the realm and establish your app like a true sover
     SECRET_KEY='you-secret-key'
     PROTOCOL='http' # Use 'https for a fortified realm in production with SSL certificates
     ```
-    Replace _username_, _password_, _host_, _port_ and *db_name* with your actual database details. The *SECRET_KEY* should be a robust, mysterious string to secure your citizens against dark arts.
+    Replace *username*, *password*, *host*, *port* and *db_name* with your actual database details. The *SECRET_KEY* should be a robust, mysterious string to secure your citizens against dark arts.
 
 5. Prepare the Database Realm
 
@@ -215,7 +213,9 @@ Replace _80_ with your desired port. This production-grade server ensures that y
 #### Optional: Hupper for Rapid Reinforcements
 
 For those times when every change needs to echo immediately across the battlefield, launch your app using _Hupper:_
+
 `hupper -m waitress-serve --port=80 --call 'app:production'`
+
 This ensures your forces are constantly in sync with your latest commands.
 
 With these commands, you're not merely running a server - you're unleashing an army of digital prowess. Your web domain is set to become a realm where every visitor experiences the might of your technological mastery.
@@ -243,8 +243,29 @@ The unseen forces guiding the realm. This section outlines the silent rules shap
 7. **Interpreting Empty Filter Values:** An empty string withing a filter value is taken as a signal that the key is _None_ - much like how a name whispered into the void fades into obscurity. Some truths are left unspoken, but their absence speaks volumes.
 
 ## A Programmer’s Oath
-   
-Coming soon...
+
+### Code, Honor, and Innovation
+
+In the pursuit of clean, efficient, and battle-hardened code, I vow to wield logic with precision, embrace creativity without compromise, and fortify every function against chaos. Whether forging new features or refining old foundations, I uphold the sacred balance between readability, performance, and maintainability - because in the realm of programming, greatness is built one line at a time.
+
+- **Architectural Overview:** The architecture follows a modular design, ensuring separation of concerns for maintainability and scalability.
+```python
+    ├── data  # database management
+    ├── models  # SQLAlchemy mapping definitions
+    ├── routers  # Flask blueprints
+    ├── storage  # storage files containing characters and users information
+    ├── test  # Pytest tests
+    └── utils  # app settings, security functions, swagger documentation template
+```
+- **Data Retrieval:** Original data is stored as a list of dictionaries. To keep id-based lookups efficient without converting it into a dictionary each time, the list is sorted on startup and binary search is used.
+- **OOP Flexibility:** Two classes - JSONDataManager and SQLDataManager - are implemented to allow seamless switching between an in-memory JSON data source and a PostgreSQL database.
+- **Database Reset:** The *_reset_database* method in SQLDataManager reinitializes the PostgreSQL database with default data (50 characters and 4 users), useful for initial setup or returning to a pristine state.
+- **Filtering Attention:** Characters filtering key *age_less_then* was treated as an attentiveness test: both filter keys (*age_less_then* and *age_less_than*) were implemented.
+- **Field Classification:** Character attributes are devided into required fields (*name*, *role*, *strength*) and optional fields (*age*, *animal*, *death*, *house*, *nickname*, *symbol*).
+- **Data Normalization:** The characters table stores only the *id* and required fields. Optional fields are handled as hybrid properties, resulting in a cleaner database and simpler SQLAlchemy queries for retrieving, setting, filtering and sorting.
+- **Sorting Flexibility:** Sorting supports both long (e.g., *sort_asc/sort_des*) and short (*asc/desc*) order parameters, defaulting to ascending when no order is provided.
+- **Database Toggle:** The *use_sql_database* boolean variable switches the app's backend between an in-memory JSON list and a PostgreSQL database.
+- **TDD & Testing:** A *skip_test* dictionary is available to skip specific test categories for faster debugging after refactoring or introducing new changes.
 
 
 ## The Scroll of Endpoints
