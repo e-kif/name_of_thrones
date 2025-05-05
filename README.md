@@ -257,6 +257,7 @@ In the pursuit of clean, efficient, and battle-hardened code, I vow to wield log
     ├── test  # Pytest tests
     └── utils  # app settings, security functions, swagger documentation template
 ```
+- **Clarity Over Clutter:** Variable and function names were carefully crafter to be self-explanatory, reducing the need for excessive comments. The code speaks for itself - structured, intuitive, and effortlessly readable.
 - **Data Retrieval:** Original data is stored as a list of dictionaries. To keep id-based lookups efficient without converting it into a dictionary each time, the list is sorted on startup and binary search is used.
 - **OOP Flexibility:** Two classes - JSONDataManager and SQLDataManager - are implemented to allow seamless switching between an in-memory JSON data source and a PostgreSQL database.
 - **Database Reset:** The *_reset_database* method in SQLDataManager reinitializes the PostgreSQL database with default data (50 characters and 4 users), useful for initial setup or returning to a pristine state.
@@ -270,7 +271,70 @@ In the pursuit of clean, efficient, and battle-hardened code, I vow to wield log
 
 ## The Scroll of Endpoints
 
-Coming soon...
+Within this sacred scroll lies the complete list of API endpoints, each a gateway to the realm's inner workings. Wether retrieving lore, forging new records, or commanding deletions, these endpoints grant you the power to shape the kingdom as you see fit. Use them wisely, for every call is a decree written in code.
+
+### Characters endpoints
+
+- `GET: /characters/` 
+Returns a random list of 20 characters ordered by ID. Supports filtering, sorting, and pagination.
+
+    - Example: Retrieve Stark characters older than 30, sorted by age (desc) `/characters/?house=Stark&age_more_than=30&sorting=age&order=sort_des`
+    
+    - Example: Retrieve page 2 of characters that have no house, sorted by name (5 per page): `/characters/?house=&limit=5&skip=1&sorting=name`
+
+- `POST: /characters/` 
+Creates a new character. Requires authorization. Must include at least *name*, *role*, and *strength* in JSON body.
+
+- `GET: /characters/{character_id}`
+Retrieves a specific character found *ID*.
+
+- `DELETE: /characters/{character_id}`
+Removes a character found by *ID*. Requires authorization.
+
+- `PUT: /characters/{character_id}`
+Updates a character by *ID*. Requires authorization. Mast include updated attributes in JSON body.
+
+
+### Users endpoints
+
+- `POST: /users/`
+Creates a new user. Must include *username*, *password*, and *role* in JSON body.
+
+- `DELETE: /users/me`
+Deletes the current user. Requires authorization.
+
+- `GET: /users/me`
+Retrieves the current user's info. Requires authorization.
+
+- `PUT: /users/me`
+Updates the current user's info. Requires authorization. Must include updated attributes in JSON body.
+
+
+### Admin endpoints
+
+*(Available only to users with the role Regional Manager.)*
+
+- `GET: /users/`
+Retrieves all registered users. Requires authorization.
+
+- `DELETE: /users/{user_id}`
+Removes a user by *ID*. Requires authorization.
+
+- `GET: /users/{user_id}`
+Retrieves a user's info by *ID*. Requires authorization.
+
+- `PUT: /users/{user_id}`
+Updates a user's info by *ID*. Requires authorization. Must include updated attributes in JSON body. 
+
+
+### Database management endpoints
+- `GET: /database/reset`
+Resets the database to its initial state (50 characters, 4 users). Requires authorization (*Regional Manager* role).
+
+
+### Authentication endpoints
+- `POST: /login`
+Returns *access_token* if credentials are valid. Must include *username* and *password* in x-www-form-urlencoded body.
 
 
 ## Defend the Realm
