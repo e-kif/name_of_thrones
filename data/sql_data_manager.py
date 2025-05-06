@@ -10,8 +10,8 @@ from utils.security import hash_password
 
 class SQLDataManager(DataManager):
 
-    def __init__(self, db: SQLAlchemy):
-        self.db = db
+    def __init__(self, database: SQLAlchemy):
+        self.db = database
         self.session = self.db.session
 
     def _reset_database(self):
@@ -97,14 +97,12 @@ class SQLDataManager(DataManager):
                     query = query.filter(attribute == value)
         return query
     
-    @staticmethod
-    def _apply_sorting(query, sorting, order, model=Characters):
+    @classmethod
+    def _apply_sorting(cls, query, sorting, order, model=Characters):
         """Validates sorting parameters. If invalid raises ValueError.
         If valid applies them to a give query, return modified query.
         """
-        sort_properties = model.allowed_fields.union({'id'})
-        if sorting not in sort_properties:
-            raise ValueError(f'Wrong sorting parameter provided: {sorting}.')
+        cls._validate_sorting(sorting, order, model)
         if order in {'desc', 'sort_des'}:
             return query.order_by(desc(getattr(Characters, sorting)))
         return query.order_by(getattr(Characters, sorting))
@@ -160,19 +158,9 @@ class SQLDataManager(DataManager):
         return self._delete(rem_character)
 
     def update_character(self, character_id, character) -> tuple:
-        """Validates type of character_id and character dict. For wrong type of character_id
-        raises a TypeError. For invalid character dict raises an AttributeError
-        with corresponding message. Updates provided character's fields, returns a tuple
-        with an updates user and status code"""
-        if not isinstance(character_id, int):
-            raise TypeError
-        wrong_fields = set(character.keys()).difference(Characters.allowed_fields)
-        if 'id' in wrong_fields:
-            raise AttributeError('Updating ID field is not allowed.')
-        if wrong_fields:
-            raise AttributeError(f'Not allowed filed(s): {", ".join(wrong_fields.difference({"id"}))}.')
-        if self._character_exists(character.get('name')):
-            raise AttributeError(f'Character {character["name"]} already exists.')
+        """Validates type of character_id and character dict. Updates provided 
+        character's fields, returns a tuple with an updates user and status code"""
+        self._validate_update_character(character_id, character)
         upd_character = self.read_character(character_id, return_object=True)
         if not isinstance(upd_character, Characters):
             return upd_character[0], upd_character[1]

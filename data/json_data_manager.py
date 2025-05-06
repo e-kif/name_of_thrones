@@ -69,14 +69,14 @@ class JSONDataManager(DataManager):
                           and character['age'] <= char_filter['age_less_then']]
         return characters
 
-    def _sort_characters(self, characters: list, sorting: str, order: str) -> list:
+    @classmethod
+    def _sort_characters(cls, characters: list, sorting: str, order: str) -> list:
         """Validates and applies character sorting"""
-        if sorting not in self.allowed_fields.union({'id'}):
-            raise ValueError
+        cls._validate_sorting(sorting, order)
         match order:
             case 'sort_des' | 'desc':
                 reverse = True
-            case None | 'asc' | 'sort_asc' | _:
+            case None | 'asc' | 'sort_asc':
                 reverse = False
         return sorted(characters, key=lambda char: (char[sorting] is None, char[sorting]), reverse=reverse)
 
@@ -132,14 +132,7 @@ class JSONDataManager(DataManager):
     def update_character(self, character_id: int, character: dict) -> tuple:
         """Updates character info for the character with id=character_id.
         Raises Attribute error for invalid character dict."""
-        if character.get('id'):
-            raise AttributeError('Updating ID field is not allowed.')
-        not_allowed_keys = set(character.keys()).difference(self.allowed_fields)
-        if not_allowed_keys:
-            raise AttributeError('Not allowed key(s): '
-                                 f'{", ".join(not_allowed_keys)}.')
-        if 'name' in character.keys() and self._character_exists(character['name']):
-            raise AttributeError(f'Character {character["name"]} already exists.')
+        self._validate_update_character(character_id, character)
         db_character = self.read_character(character_id, return_dict=True)
         db_character.update(character)
         return db_character, 200
