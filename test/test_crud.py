@@ -53,6 +53,27 @@ def test_json_create_operation(json_db, robert_baratheon):
         json_db.add_character({'id': 55, 'name': 'Mock', 'role': 'Mocker', 'strength': 'Mocking'})
     with pytest.raises(ValueError):
         json_db.add_character({'role': 'Nameless person', 'strength': 'Stealth'})
+    with pytest.raises(ValueError):
+        json_db.add_character({'name': None, 'role': 'Nameless person', 'strength': 'Stealth'})
+    with pytest.raises(TypeError):
+        json_db.add_character({'name': 23, 'role': 'Number', 'strengths': 'Counting'})
+    with pytest.raises(TypeError):
+        json_db.add_character({'name': 'char', 'role': 'role', 'strength': 5})
+    with pytest.raises(TypeError):
+        json_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'age': 'twelve'})
+    with pytest.raises(TypeError):
+        json_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'death': 'eight'})
+    with pytest.raises(TypeError):
+        json_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'animal': 12})
+    with pytest.raises(TypeError):
+        json_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'symbol': 22})
+    with pytest.raises(TypeError):
+        json_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'nickname': 432})
+    with pytest.raises(TypeError):
+        json_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'house': 233.122})
+    del robert_baratheon['id']
+    with pytest.raises(AttributeError):
+        json_db.add_character(robert_baratheon)
 
 
 @pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
@@ -79,6 +100,12 @@ def test_json_update_operation(json_db, jon_snow, olenna_tyrell):
         json_db.update_character(5, {'hair': None}), 'Update with not allowed field'
     with pytest.raises(AttributeError):
         json_db.update_character(11, {'name': olenna_tyrell['name']}), 'Update character name to already existing character name'
+    with pytest.raises(TypeError):
+        json_db.update_character(11, {'name': 12})
+    with pytest.raises(TypeError):
+        json_db.update_character(11, {'age': 'one'})
+    with pytest.raises(TypeError):
+        json_db.update_character('eleven', {'age':34})
 
 
 @pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
@@ -138,6 +165,24 @@ def test_sql_create_operation(sql_db, robert_baratheon):
         sql_db.add_character({'id': 55, 'name': 'Mock', 'role': 'Mocker', 'strength': 'Mocking'})
     with pytest.raises(ValueError):
         sql_db.add_character({'role': 'Nameless person', 'strength': 'Stealth'})
+    with pytest.raises(ValueError):
+        sql_db.add_character({'name': None, 'role': 'Nameless person', 'strength': 'Stealth'})
+    with pytest.raises(TypeError):
+        sql_db.add_character({'name': 23, 'role': 'Number', 'strengths': 'Counting'})
+    with pytest.raises(TypeError):
+        sql_db.add_character({'name': 'char', 'role': 'role', 'strength': 5})
+    with pytest.raises(TypeError):
+        sql_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'age': 'twelve'})
+    with pytest.raises(TypeError):
+        sql_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'death': 'eight'})
+    with pytest.raises(TypeError):
+        sql_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'animal': 12})
+    with pytest.raises(TypeError):
+        sql_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'symbol': 22})
+    with pytest.raises(TypeError):
+        sql_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'nickname': 432})
+    with pytest.raises(TypeError):
+        sql_db.add_character({'name': 'name', 'role': 'role', 'strength': 'strength', 'house': 233.122})
     with pytest.raises(AttributeError):
         sql_db.add_character(robert_baratheon)
 
@@ -168,9 +213,13 @@ def test_sql_update_operation(sql_db, jon_snow, olenna_tyrell):
     with pytest.raises(AttributeError):
         sql_db.update_character(5, {'hair': None}), 'Update with not allowed field'
     with pytest.raises(AttributeError):
-        sql_db.update_character(22, {'name': olenna_tyrell['name']}), 'Update with not allowed field'
+        sql_db.update_character(11, {'name': olenna_tyrell['name']}), 'Update character name to already existing character name'
     with pytest.raises(TypeError):
-        sql_db.update_character('one', {'name': 'the_first'}), 'Update character with str for id'
+        sql_db.update_character(11, {'name': 12})
+    with pytest.raises(TypeError):
+        sql_db.update_character(11, {'age': 'one'})
+    with pytest.raises(TypeError):
+        sql_db.update_character('eleven', {'age':34})
 
 
 @pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')
@@ -211,5 +260,4 @@ def test_sql_delete_user(sql_db):
     assert sql_db.delete_user(3) == ({'username': 'Pam', 'id': 3, 'role': 'Receptionist'}, 200), 'Wrong return on user delete'
     assert len(sql_db.read_users()[0]) == total_users - 1, 'User count did not change after deleting a user'
     assert sql_db.delete_user(88) == ({'error': 'User with id=88 was not found.'}, 404), 'Wrong return on deleting non existing user'
-    
     
