@@ -95,20 +95,7 @@ class JSONDataManager(DataManager):
         """Validates character parameter, if valid: adds new character to the instance storage.
         If invalid: raises ValueError.
         """
-        if 'id' in character.keys():
-            raise ValueError('Character id should not be provided.')
-        missing_required_fields = self.req_fields.difference(set(character.keys()))
-        if missing_required_fields:
-            raise ValueError('Missing required field(s): '
-                             f'{", ".join(missing_required_fields)}.')
-        not_defined_req_fields = [field for field in self.req_fields if character[field] is None]
-        if not_defined_req_fields:
-            raise ValueError(f"Character's {', '.join(not_defined_req_fields)} can not be None.")
-        empty_req_fields = [field for field in self.req_fields if character[field].strip() == '']
-        if empty_req_fields:
-            raise ValueError(f"Character's {', '.join(empty_req_fields)} can not be empty.")
-        if self._character_exists(character['name']):
-            raise ValueError(f'Character {character["name"]} already exists.')
+        self._validate_add_character(character)
         character.update({'id': self.next_character_index})
         [character.update({key: None}) for key in self.opt_fields
          if key not in character.keys()]

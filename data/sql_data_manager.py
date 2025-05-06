@@ -133,27 +133,7 @@ class SQLDataManager(DataManager):
         or an AttributeError (if character already exists in database). If valid:
         adds a character to the database and returns tuple with created character and a status code
         """
-        if 'id' in character.keys():
-            raise ValueError('Character id should not be provided.')
-        missing_req_fields = Characters.req_fields.difference(set(character.keys()))
-        if missing_req_fields:
-            raise ValueError(f'Missing required field(s): {", ".join(missing_req_fields)}.')
-        req_fields_none = [key for key in Characters.req_fields if character[key] is None]
-        if req_fields_none:
-            raise ValueError(f'Character\'s {req_fields_none[0]} can not be None.')
-        empty_req_fields = [key for key in Characters.req_fields if character[key].strip() == '']
-        if empty_req_fields:
-            raise ValueError(f'Character\'s {empty_req_fields[0]} can not be empty.')
-        if self._character_exists(character['name']):
-            raise AttributeError(f'Character {character["name"]} already exists.')
-        for field in {'age', 'death'}:
-            if character.get(field) and not isinstance(character[field], int):
-                raise TypeError(f'Character\'s {field} should be an integer.')
-        for field in Characters.allowed_fields.difference({'age', 'death'}):
-            if character.get(field) and not isinstance(character[field], str):
-                raise TypeError(f'Character\'s {field} should be a string.')
-
-
+        self._validate_add_character(character)
         character_req = {key: value for key, value in character.items()
                          if value is not None and key in Characters.req_fields}
         character_opt = {key: value for key, value in character.items()

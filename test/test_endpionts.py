@@ -110,7 +110,7 @@ def test_create_character_json(json_client, daenerys, robert_baratheon, aemon, h
 
     daenerys.pop('id')
     create_dany = json_client.post('/characters', json=daenerys, headers=headers_json, follow_redirects=True)
-    assert create_dany.status_code == 400, 'Wrong status code on creating existing character'
+    assert create_dany.status_code == 409, 'Wrong status code on creating existing character'
     assert create_dany.json == {'error': f'Character {daenerys["name"]} already exists.'}, 'Wrong error message on creating existing character'
 
 
