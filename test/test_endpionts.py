@@ -112,6 +112,12 @@ def test_create_character_json(json_client, daenerys, robert_baratheon, aemon, h
     create_dany = json_client.post('/characters', json=daenerys, headers=headers_json, follow_redirects=True)
     assert create_dany.status_code == 409, 'Wrong status code on creating existing character'
     assert create_dany.json == {'error': f'Character {daenerys["name"]} already exists.'}, 'Wrong error message on creating existing character'
+    wrong_name_type = json_client.post('/characters/', json={'name': True, 'role': 'Boolean', 'strength': 'Agreement'}, headers=headers_json)
+    assert wrong_name_type.status_code == 400, 'Wrong status code on creating a character with wrong name type'
+    assert wrong_name_type.json == {'error': "Character's name should be a string."}, 'Wrong error message on creating a character with wrong name type'
+    wrong_age_type = json_client.post('/characters/', json={'name': 'Name', 'role': 'Boolean', 'strength': 'Agreement', 'age': 'twenty'}, headers=headers_json)
+    assert wrong_age_type.status_code == 400, 'Wrong status code on creating a character with wrong age type'
+    assert wrong_age_type.json == {'error': "Character's age should be an integer."}, 'Wrong error message on creating a character with wrong age type'
 
 
 @pytest.mark.skipif(skip_tests['routes_json'], reason='Skipped by config')
@@ -258,6 +264,12 @@ def test_create_character_sql(sql_db, sql_client, daenerys, robert_baratheon, ae
     create_dany = sql_client.post('/characters', json=daenerys, headers=headers_sql, follow_redirects=True)
     assert create_dany.status_code == 409, 'Wrong status code on creating existing character'
     assert create_dany.json == {'error': f'Character {daenerys["name"]} already exists.'}, 'Wrong error message on creating existing character'
+    wrong_name_type = sql_client.post('/characters/', json={'name': True, 'role': 'Boolean', 'strength': 'Agreement'}, headers=headers_sql)
+    assert wrong_name_type.status_code == 400, 'Wrong status code on creating a character with wrong name type'
+    assert wrong_name_type.json == {'error': "Character's name should be a string."}, 'Wrong error message on creating a character with wrong name type'
+    wrong_age_type = sql_client.post('/characters/', json={'name': 'Name', 'role': 'Boolean', 'strength': 'Agreement', 'age': 'twenty'}, headers=headers_sql)
+    assert wrong_age_type.status_code == 400, 'Wrong status code on creating a character with wrong age type'
+    assert wrong_age_type.json == {'error': "Character's age should be an integer."}, 'Wrong error message on creating a character with wrong age type'
 
 
 @pytest.mark.skipif(skip_tests['routes_sql'], reason='Skipped by config')

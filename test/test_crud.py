@@ -39,6 +39,8 @@ def test_json_read_characters_sorting(json_db, jon_snow, daenerys, olenna_tyrell
     assert json_db.read_characters(sorting='id', order='sort_des')[0][0] == olenna_tyrell
     with pytest.raises(ValueError):
         json_db.read_characters(sorting='family')
+    with pytest.raises(ValueError):
+        json_db.read_characters(sorting='house', order='family')
 
 
 @pytest.mark.skipif(skip_tests['crud_json'], reason='Skipped by config')
@@ -151,6 +153,8 @@ def test_sql_read_characters_sorting(sql_db, jon_snow, daenerys, olenna_tyrell):
     assert sql_db.read_characters(sorting='id', order='sort_des')[0][0] == olenna_tyrell
     with pytest.raises(ValueError):
         sql_db.read_characters(sorting='family')
+    with pytest.raises(ValueError):
+        sql_db.read_characters(sorting='house', order='family')
 
 
 @pytest.mark.skipif(skip_tests['crud_sql'], reason='Skipped by config')

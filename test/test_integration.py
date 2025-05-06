@@ -19,6 +19,7 @@ def test_data_manager_abstract_method():
     assert Dummy().remove_character(1) is None
     assert Dummy().add_character({'name': 'Frodo Beggins'}) is None
     assert Dummy().update_character(1, {'name': 'Bilbo Beggins'}) is None
+    assert Dummy()._character_exists('Jon Snow') is None
 
 
 @pytest.mark.skipif(skip_tests['integration'], reason='Skipped by config')
@@ -30,6 +31,7 @@ def test_json_db_integration():
     assert json_db().__getattribute__('add_character'), 'Add character method is missing'
     assert json_db().__getattribute__('update_character'), 'Update character method is missing'
     assert json_db().__getattribute__('characters'), 'Characters getter method is missing'
+    assert json_db().__getattribute__('_character_exists'), 'Characters getter method is missing'
     with pytest.raises(FileNotFoundError):
         assert json_db('some_file.json'), 'Non existent file does not raise an exception'
 
