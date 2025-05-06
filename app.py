@@ -54,6 +54,3 @@ def production():
 if __name__ == '__main__':
     main()  # pragma: no cover
 
-    # todo pydantic schemas
-    # todo update readme
-    # todo ci/cd workflow
