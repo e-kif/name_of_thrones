@@ -30,8 +30,10 @@ def test_token_generation_sql(sql_client, sql_db):
     assert correct_token.status_code == 200, 'Wrong status code on successful token'
     assert correct_token.json.get('access_token'), 'There is no token key in response'
     sql_client.get('/database/reset', headers={'Authorization': f'Bearer {correct_token.json["access_token"]}'})
-    assert sql_client.delete('/characters/33',
-                             headers={'Authorization': f'Bearer {correct_token.json["access_token"]}'}).status_code == 200
+    assert sql_client.delete(
+        '/characters/33',
+        headers={'Authorization': f'Bearer {correct_token.json["access_token"]}'}
+    ).status_code == 200
 
 
 @pytest.mark.skipif(skip_tests['authentication'], reason='Skipped by config')

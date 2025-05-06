@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import exc, LargeBinary
+from sqlalchemy import LargeBinary
 from utils.settings import db
 
 

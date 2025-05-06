@@ -4,7 +4,6 @@ from utils.security import token_required
 database_bp = Blueprint('database', __name__)
 
 
-# @token_required
 @database_bp.route('/reset', methods=['GET'])
 @token_required(required_role='Regional Manager')
 def reset_database():
