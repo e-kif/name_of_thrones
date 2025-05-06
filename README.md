@@ -44,6 +44,8 @@ Have you ever found yourself drowning in the sea of characters, houses, and alli
 
 Stay ahead of the chaos. With Name of Thrones, you’ll never lose track of who’s rising to power, who’s falling, and who’s wielding their strength to change the fate of the realm.
 
+**Live Interactive Documentation - The Portal of Decrees.** Experience our [Swagger-powered documentation](https://name-of-thrones.kifiuk.com/apidocs) in real time! Test every endpoint as if you were issuing royal commands. Whether summoning character lore or managing alliances, this portal is your gateway to mastering the realm of Name of Thrones.
+
 ## Feast of Features
 
 ### Features fit for a king (or queen):
@@ -341,18 +343,42 @@ Returns *access_token* if credentials are valid. Must include *username* and *pa
 
 ### Clear Instructions on How to Run the Tests
 
-Coming soon...
-
+Prepare your virtual battleground and execute the test suite:
+- Ensure your virtual environment is active:
+    ```bash
+    source .venv/bin/activate  # Unix/Linux
+    .venv\Scripts\activate     # Windows
+    ```
+- Install all dependencies: `pip3 install -r requirements.txt`
+- Adjust the *skip_tests* dictionary in *utils/settings.py* to enable or disable specific tests.
+- Run the tests using: `pytest`
 
 ### The Trial of Tests
 
-Coming soon...
+After running pytest, you'll receive a battle report:
+- **Passes:** Each test that passed is a victory, proving your code's resilience.
+- **Failures:** Any failed tests highlight weak spots to be reforged.
+- **Skipped:** Tests noted as skipped reflect the settings in your *skip_tests* dictionary. The summary details the number of passed, failed, and skipped tests, guiding you on where to strengthen your code.
+
 
 ### The Allies You’ll Need
 
-Coming soon...
+For your trials to proceed flawlessly, ensure these essential tools are installed:
+- **pytest:** The engine that drives our test suite.
+- **coverage:** To monitor how much of the App code is being tested.
 
 
 ### Command the Test Army
 
-Coming soon...
+Here are some commands to help you engage the trials:
+- Basic run: `pytest`
+- Verbose Output: `pytest -v`
+- Run a Specific Test File: `pytest test/test_crud.py`
+- Quiet Mode (One-Line Summary): `pytest -q`
+- Coverage report:
+    ```bash
+    coverage run -m pytest # Run the test suite using pytest and track code coverage
+    coverage report -m     # Generage a detailed coverage report showing which lines were missed
+    ```
+With these steps, your code undergoes a true trial by fire, ensuring readiness for any challenge that lies ahead.
+
