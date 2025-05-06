@@ -3,8 +3,7 @@ from flask import Flask, g
 from flasgger import Swagger
 from dotenv import load_dotenv
 from routers import database_bp, characters_bp, errorhandlers_bp, authentication_bp, users_bp
-from data.json_data_manager import JSONDataManager
-from data.sql_data_manager import SQLDataManager
+from data import JSONDataManager, SQLDataManager
 from utils.settings import db, use_sql_database
 from utils.docs import swagger_template
 

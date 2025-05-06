@@ -1,5 +1,5 @@
 import pytest
-from data.json_data_manager import JSONDataManager as json_data_manager
+from data import JSONDataManager as json_data_manager
 from utils.settings import skip_tests
 
 
